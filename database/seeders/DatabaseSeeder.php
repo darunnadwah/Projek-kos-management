@@ -15,11 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+    foreach (['superadmin', 'admin', 'pemilik'] as $role) {
+    User::factory()->create(['name' => ucfirst($role), 'email' => "$role@example.com", 'role' => $role]);
+    }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+    foreach (range(1, 5) as $n) {
+        Room::create(['room_number' => "A0$n", 'base_price' => 800000]);
+    }
     }
 }
