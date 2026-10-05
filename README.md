@@ -150,3 +150,35 @@ Semua migrasi berstatus `DONE` dan seeder berjalan tanpa error.
 
 - Rancangan awal menyebut PostgreSQL. Untuk pindah dari SQLite, ubah di `.env`: `DB_CONNECTION=pgsql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, lalu jalankan ulang `php artisan migrate:fresh --seed`.
 - Autentikasi Google SSO, controller, dan view dikerjakan anggota lain.
+
+## C. Tugas Studio 2 – Bobot 2,5%
+
+### 8. Menentukan entitas
+
+Gunakan `Room` sebagai entitas yang dikelola pada tugas ini. Data kamar sudah dibuat di langkah migrasi dan seeder sebelumnya.
+
+### 9. Membuat resource controller dan Form Request
+
+```bash
+php artisan make:controller RoomController --resource --model=Room
+php artisan make:request StoreRoomRequest
+php artisan make:request UpdateRoomRequest
+```
+
+Resource controller menyediakan tujuh aksi: `index`, `create`, `store`, `show`, `edit`, `update`, dan `destroy`. Aturan validasi input kamar ditulis di `StoreRoomRequest` dan `UpdateRoomRequest`, bukan langsung di controller.
+
+### 10. Menambahkan route resource
+
+Daftarkan route resource untuk `RoomController` di `routes/web.php`. Gunakan route model binding pada aksi yang membutuhkan data kamar, supaya controller menerima model `Room` dari route dan tidak perlu mencari data secara manual.
+
+### 11. Membuat halaman CRUD kamar
+
+Buat halaman untuk menampilkan daftar kamar, detail kamar, form tambah, dan form ubah. Form kamar berisi nomor kamar, status, dan harga dasar. Tampilkan error validasi di dekat input yang bermasalah dan pertahankan input yang sudah diisi ketika validasi gagal.
+
+### 12. Mengatur hasil aksi
+
+Hubungkan form dengan aksi `store` dan `update`, lalu sediakan aksi `destroy` untuk menghapus kamar. Setelah aksi tambah, ubah, atau hapus berhasil, arahkan kembali ke halaman yang sesuai dan tampilkan flash message. Tidak perlu menambahkan JavaScript untuk alur ini.
+
+### 13. Mengecek alur dan menyiapkan screenshot
+
+Jalankan aplikasi dan cek alur tambah kamar dengan form kosong, pengiriman data yang ditolak karena input tidak valid, serta pengiriman data yang berhasil. Siapkan tiga screenshot: form kosong, form dengan error validasi, dan halaman setelah berhasil dengan pesan flash.
