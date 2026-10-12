@@ -18,11 +18,10 @@ class UpdateRoomRequest extends FormRequest
             'room_number' => [
                 'required',
                 'string',
-                'max:255',
                 Rule::unique('rooms', 'room_number')->ignore($this->route('room')),
             ],
-            'status' => ['required', 'in:available,occupied,maintenance'],
-            'base_price' => ['required', 'integer', 'min:0', 'max:4294967295'],
+            'status'     => ['required', 'string'],
+            'base_price' => ['required', 'numeric'],
         ];
     }
 

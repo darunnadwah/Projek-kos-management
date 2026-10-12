@@ -6,20 +6,21 @@ use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
 use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class RoomController extends Controller
 {
-    public function index(): View
+    public function index(): Response
     {
-        return view('dashboard.rooms.index', [
+        return Inertia::render('Dashboard/Rooms/Index', [
             'rooms' => Room::query()->orderBy('room_number')->paginate(10),
         ]);
     }
 
-    public function create(): View
+    public function create(): Response
     {
-        return view('dashboard.rooms.create');
+        return Inertia::render('Dashboard/Rooms/Create');
     }
 
     public function store(StoreRoomRequest $request): RedirectResponse
@@ -27,18 +28,22 @@ class RoomController extends Controller
         $room = Room::create($request->validated());
 
         return redirect()
-            ->route('rooms.show', $room)
+            ->route('rooms.index')
             ->with('success', 'Kamar berhasil ditambahkan.');
     }
 
-    public function show(Room $room): View
+    public function show(Room $room): Response
     {
-        return view('dashboard.rooms.show', compact('room'));
+        return Inertia::render('Dashboard/Rooms/Show', [
+            'room' => $room,
+        ]);
     }
 
-    public function edit(Room $room): View
+    public function edit(Room $room): Response
     {
-        return view('dashboard.rooms.edit', compact('room'));
+        return Inertia::render('Dashboard/Rooms/Edit', [
+            'room' => $room,
+        ]);
     }
 
     public function update(UpdateRoomRequest $request, Room $room): RedirectResponse
@@ -46,7 +51,7 @@ class RoomController extends Controller
         $room->update($request->validated());
 
         return redirect()
-            ->route('rooms.show', $room)
+            ->route('rooms.index')
             ->with('success', 'Data kamar berhasil diperbarui.');
     }
 
