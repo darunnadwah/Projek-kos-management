@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -14,6 +15,8 @@ class RoomCrudTest extends TestCase
 
     public function test_room_resource_pages_are_available(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $room = Room::create([
             'room_number' => 'A01',
             'status' => 'available',
@@ -24,6 +27,9 @@ class RoomCrudTest extends TestCase
         $this->get(route('rooms.index'))
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Dashboard/Rooms/Index')
+                ->where('can.create', true)
+                ->where('can.update', true)
+                ->where('can.delete', true)
                 ->has('rooms.data', 1)
                 ->where('rooms.data.0.room_number', 'A01'));
         $this->get(route('rooms.create'))
@@ -32,6 +38,8 @@ class RoomCrudTest extends TestCase
         $this->get(route('rooms.show', $room))
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Dashboard/Rooms/Show')
+                ->where('can.update', true)
+                ->where('can.delete', true)
                 ->where('room.room_number', 'A01')
                 ->where('room.base_price', 800000));
         $this->get(route('rooms.edit', $room))
@@ -42,6 +50,8 @@ class RoomCrudTest extends TestCase
 
     public function test_room_list_paginates_when_more_than_ten_rooms_exist(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         foreach (range(1, 12) as $number) {
             Room::create([
                 'room_number' => sprintf('R%02d', $number),
@@ -64,6 +74,8 @@ class RoomCrudTest extends TestCase
 
     public function test_room_can_be_created_updated_and_deleted_with_flash_messages(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $this->from(route('rooms.create'))
             ->post(route('rooms.store'), [
                 'room_number' => 'B12',
@@ -105,6 +117,8 @@ class RoomCrudTest extends TestCase
 
     public function test_invalid_room_input_returns_to_form_with_errors_and_old_input(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $response = $this->from(route('rooms.create'))
             ->post(route('rooms.store'), [
                 'room_number' => '',
@@ -126,6 +140,8 @@ class RoomCrudTest extends TestCase
 
     public function test_non_integer_room_price_is_rejected_with_a_message(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $this->from(route('rooms.create'))
             ->post(route('rooms.store'), [
                 'room_number' => 'C03',
@@ -141,6 +157,8 @@ class RoomCrudTest extends TestCase
 
     public function test_room_price_above_unsigned_integer_limit_is_rejected(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $this->from(route('rooms.create'))
             ->post(route('rooms.store'), [
                 'room_number' => 'C04',
@@ -156,6 +174,8 @@ class RoomCrudTest extends TestCase
 
     public function test_room_number_must_be_unique_when_creating_or_updating(): void
     {
+        $this->actingAs(User::factory()->admin()->create());
+
         $firstRoom = Room::create([
             'room_number' => 'A01',
             'status' => 'available',
@@ -216,6 +236,8 @@ class RoomCrudTest extends TestCase
         string $field,
         string $message,
     ): void {
+        $this->actingAs(User::factory()->admin()->create());
+
         $room = Room::create([
             'room_number' => 'D01',
             'status' => 'available',

@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
+import AuthenticatedLayout from '../../../Components/AuthenticatedLayout';
 import RoomStatus from './RoomStatus';
 
-export default function Show({ room }) {
+export default function Show({ room, can }) {
     return (
+        <AuthenticatedLayout>
         <div className="mx-auto max-w-2xl p-4 sm:p-6">
             <Head title={`Detail kamar ${room.room_number}`} />
             <div className="rounded-lg border border-gray-200 bg-white p-5 shadow sm:p-6">
@@ -29,11 +31,14 @@ export default function Show({ room }) {
                     <Link href="/rooms" className="rounded-lg bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600">
                         Kembali
                     </Link>
-                    <Link href={`/rooms/${room.id}/edit`} className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
-                        Ubah
-                    </Link>
+                    {can.update && (
+                        <Link href={`/rooms/${room.id}/edit`} className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+                            Ubah
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
+        </AuthenticatedLayout>
     );
 }

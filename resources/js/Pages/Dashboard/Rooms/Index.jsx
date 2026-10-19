@@ -1,8 +1,9 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import AuthenticatedLayout from '../../../Components/AuthenticatedLayout';
 import RoomStatus from './RoomStatus';
 
-export default function Index({ rooms }) {
+export default function Index({ rooms, can }) {
     const { flash } = usePage().props;
     const [deletingRoomId, setDeletingRoomId] = useState(null);
 
@@ -30,6 +31,7 @@ export default function Index({ rooms }) {
         .replace(/^Next$/, 'Berikutnya');
 
     return (
+        <AuthenticatedLayout>
         <div className="mx-auto max-w-7xl p-4 sm:p-6">
             {flash?.success && (
                 <div role="status" aria-live="polite" className="mb-4 rounded-lg bg-green-100 p-4 text-sm text-green-800">
@@ -44,21 +46,25 @@ export default function Index({ rooms }) {
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <h1 className="text-2xl font-bold text-gray-800">Daftar kamar</h1>
-                <Link
-                    href="/rooms/create"
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white shadow transition hover:bg-blue-700"
-                >
-                    + Tambah kamar
-                </Link>
+                {can.create && (
+                    <Link
+                        href="/rooms/create"
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white shadow transition hover:bg-blue-700"
+                    >
+                        + Tambah kamar
+                    </Link>
+                )}
             </div>
 
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
                 {rooms.data.length === 0 ? (
                     <div className="p-8 text-center">
                         <p className="text-sm text-gray-600">Belum ada data kamar.</p>
-                        <Link href="/rooms/create" className="mt-3 inline-block text-sm font-semibold text-blue-700 hover:underline">
-                            Tambahkan kamar pertama
-                        </Link>
+                        {can.create && (
+                            <Link href="/rooms/create" className="mt-3 inline-block text-sm font-semibold text-blue-700 hover:underline">
+                                Tambahkan kamar pertama
+                            </Link>
+                        )}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -89,20 +95,24 @@ export default function Index({ rooms }) {
                                                 >
                                                     Detail
                                                 </Link>
-                                                <Link
-                                                    href={`/rooms/${room.id}/edit`}
-                                                    className="rounded bg-amber-600 px-3 py-1 text-xs text-white hover:bg-amber-700"
-                                                >
-                                                    Ubah
-                                                </Link>
-                                                <button
-                                                    type="button"
-                                                    disabled={deletingRoomId !== null}
-                                                    onClick={() => handleDelete(room)}
-                                                    className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                                                >
-                                                    {deletingRoomId === room.id ? 'Menghapus...' : 'Hapus'}
-                                                </button>
+                                                {can.update && (
+                                                    <Link
+                                                        href={`/rooms/${room.id}/edit`}
+                                                        className="rounded bg-amber-600 px-3 py-1 text-xs text-white hover:bg-amber-700"
+                                                    >
+                                                        Ubah
+                                                    </Link>
+                                                )}
+                                                {can.delete && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={deletingRoomId !== null}
+                                                        onClick={() => handleDelete(room)}
+                                                        className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                                    >
+                                                        {deletingRoomId === room.id ? 'Menghapus...' : 'Hapus'}
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -141,5 +151,6 @@ export default function Index({ rooms }) {
                 </nav>
             )}
         </div>
+        </AuthenticatedLayout>
     );
 }

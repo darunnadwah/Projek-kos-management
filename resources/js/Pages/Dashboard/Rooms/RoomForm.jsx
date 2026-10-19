@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import AuthenticatedLayout from '../../../Components/AuthenticatedLayout';
 
 const statuses = [
     { value: 'available', label: 'Tersedia' },
@@ -30,6 +31,7 @@ export default function RoomForm({ room = null }) {
     }`;
 
     return (
+        <AuthenticatedLayout>
         <div className="mx-auto max-w-2xl p-4 sm:p-6">
             <Head title={isEditing ? `Ubah kamar ${room.room_number}` : 'Tambah kamar'} />
 
@@ -139,5 +141,6 @@ export default function RoomForm({ room = null }) {
                 </form>
             </div>
         </div>
+        </AuthenticatedLayout>
     );
 }
