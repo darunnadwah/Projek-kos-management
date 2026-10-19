@@ -1,7 +1,10 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import AuthenticatedLayout from '../../../Components/AuthenticatedLayout';
-import RoomStatus from './RoomStatus';
+import AuthenticatedLayout from '@/Components/AuthenticatedLayout';
+import RoomStatus from '@/Components/Rooms/RoomStatus';
+import BarisRoom from '@/Components/Rooms/BarisRoom';
+import PesanFlash from '@/Components/PesanFlash';
+import Kosong from '@/Components/Kosong';
 
 export default function Index({ rooms, can }) {
     const { flash } = usePage().props;

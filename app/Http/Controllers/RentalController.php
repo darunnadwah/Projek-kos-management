@@ -16,14 +16,14 @@ class RentalController extends Controller
     public function index(): Response
     {
         return Inertia::render('Dashboard/Rentals/Index', [
-            // Mengurutkan dari penyewaan terbaru
-            'rentals' => Rental::query()->latest()->paginate(10),
+            // Sertakan relasi user & room langsung di pagination
+            'rentals' => Rental::with(['user', 'room'])->latest()->paginate(10),
         ]);
     }
 
     public function create()
     {
-    return Inertia::render('Dashboard/Rentals/Create', [
+        return Inertia::render('Dashboard/Rentals/Create', [
             'users' => User::all(),
             'rooms' => Room::all(),
         ]);
@@ -31,36 +31,36 @@ class RentalController extends Controller
 
     public function store(StoreRentalRequest $request): RedirectResponse
     {
-        $rental = Rental::create($request->validated());
+        Rental::create($request->validated());
 
         return redirect()
             ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil ditambahkan.');
+            ->with('sukses', 'Data penyewaan berhasil ditambahkan.');
     }
 
     public function show(Rental $rental): Response
     {
         return Inertia::render('Dashboard/Rentals/Show', [
-            'rental' => $rental,
+            'rental' => $rental->load(['user', 'room']),
         ]);
     }
 
     public function edit(Rental $rental)
     {
-    return Inertia::render('Dashboard/Rentals/Edit', [
+        return Inertia::render('Dashboard/Rentals/Edit', [
             'rental' => $rental,
             'users' => User::all(),
             'rooms' => Room::all(),
         ]);
     }
 
-    public function update(UpdateRentalRequest $request, Rental$rental): RedirectResponse
+    public function update(UpdateRentalRequest $request, Rental $rental): RedirectResponse
     {
         $rental->update($request->validated());
 
         return redirect()
             ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil diperbarui.');
+            ->with('sukses', 'Data penyewaan berhasil diperbarui.');
     }
 
     public function destroy(Rental $rental): RedirectResponse
@@ -69,6 +69,6 @@ class RentalController extends Controller
 
         return redirect()
             ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil dihapus.');
+            ->with('sukses', 'Data penyewaan berhasil dihapus.');
     }
 }

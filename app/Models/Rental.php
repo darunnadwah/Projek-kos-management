@@ -12,8 +12,11 @@ class Rental extends Model
     protected $fillable = [
         'user_id',
         'room_id',
+        'start_date',
+        'end_date',
         'add_ons',
         'total_price',
+        'status',
         'payment_status',
     ];
 
