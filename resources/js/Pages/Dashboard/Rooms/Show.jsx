@@ -1,32 +1,36 @@
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import RoomStatus from './RoomStatus';
 
 export default function Show({ room }) {
     return (
-        <div className="max-w-2xl mx-auto p-6">
-            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Detail Kamar {room.room_number}</h3>
+        <div className="mx-auto max-w-2xl p-4 sm:p-6">
+            <Head title={`Detail kamar ${room.room_number}`} />
+            <div className="rounded-lg border border-gray-200 bg-white p-5 shadow sm:p-6">
+                <h1 className="mb-4 text-xl font-bold text-gray-800">Detail kamar {room.room_number}</h1>
 
-                <div className="space-y-3 border-t border-b border-gray-100 py-4 my-4">
-                    <p className="text-sm text-gray-700">
-                        <strong className="font-semibold text-gray-900">Nomor Kamar:</strong> {room.room_number}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                        <strong className="font-semibold text-gray-900">Status:</strong>{' '}
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                            {room.status}
-                        </span>
-                    </p>
-                    <p className="text-sm text-gray-700">
-                        <strong className="font-semibold text-gray-900">Harga Dasar:</strong> Rp {Number(room.base_price).toLocaleString('id-ID')}
-                    </p>
-                </div>
+                <dl className="my-4 space-y-4 border-y border-gray-100 py-4">
+                    <div>
+                        <dt className="text-sm font-semibold text-gray-900">Nomor kamar</dt>
+                        <dd className="mt-1 text-sm text-gray-700">{room.room_number}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-semibold text-gray-900">Status</dt>
+                        <dd className="mt-1"><RoomStatus status={room.status} /></dd>
+                    </div>
+                    <div>
+                        <dt className="text-sm font-semibold text-gray-900">Harga dasar per bulan</dt>
+                        <dd className="mt-1 text-sm text-gray-700">
+                            Rp {Number(room.base_price).toLocaleString('id-ID')}
+                        </dd>
+                    </div>
+                </dl>
 
                 <div className="flex gap-2">
-                    <Link href="/rooms" className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium">
+                    <Link href="/rooms" className="rounded-lg bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600">
                         Kembali
                     </Link>
-                    <Link href={`/rooms/${room.id}/edit`} className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium">
-                        Edit
+                    <Link href={`/rooms/${room.id}/edit`} className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+                        Ubah
                     </Link>
                 </div>
             </div>

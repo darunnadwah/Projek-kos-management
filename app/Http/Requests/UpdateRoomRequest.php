@@ -18,10 +18,11 @@ class UpdateRoomRequest extends FormRequest
             'room_number' => [
                 'required',
                 'string',
+                'max:255',
                 Rule::unique('rooms', 'room_number')->ignore($this->route('room')),
             ],
-            'status'     => ['required', 'string'],
-            'base_price' => ['required', 'numeric'],
+            'status' => ['required', 'in:available,occupied,maintenance'],
+            'base_price' => ['required', 'integer', 'min:0', 'max:4294967295'],
         ];
     }
 
@@ -29,6 +30,8 @@ class UpdateRoomRequest extends FormRequest
     {
         return [
             'room_number.required' => 'Nomor kamar wajib diisi.',
+            'room_number.string' => 'Nomor kamar harus berupa teks.',
+            'room_number.max' => 'Nomor kamar tidak boleh lebih dari 255 karakter.',
             'room_number.unique' => 'Nomor kamar ini sudah digunakan.',
             'status.required' => 'Status kamar wajib dipilih.',
             'status.in' => 'Pilih status kamar yang tersedia.',

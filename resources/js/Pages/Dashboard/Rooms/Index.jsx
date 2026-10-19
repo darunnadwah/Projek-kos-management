@@ -1,83 +1,145 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import RoomStatus from './RoomStatus';
 
 export default function Index({ rooms }) {
     const { flash } = usePage().props;
+    const [deletingRoomId, setDeletingRoomId] = useState(null);
+
+    const handleDelete = (room) => {
+        const confirmed = window.confirm(
+            `Hapus kamar ${room.room_number}? Data penyewaan yang terkait juga akan terhapus.`,
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setDeletingRoomId(room.id);
+        router.delete(`/rooms/${room.id}`, {
+            preserveScroll: true,
+            onFinish: () => setDeletingRoomId(null),
+        });
+    };
+
+    const formatPaginationLabel = (label) => label
+        .replace('&laquo;', '')
+        .replace('&raquo;', '')
+        .trim()
+        .replace(/^Previous$/, 'Sebelumnya')
+        .replace(/^Next$/, 'Berikutnya');
 
     return (
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="mx-auto max-w-7xl p-4 sm:p-6">
             {flash?.success && (
-                <div className="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
+                <div role="status" aria-live="polite" className="mb-4 rounded-lg bg-green-100 p-4 text-sm text-green-800">
                     {flash.success}
                 </div>
             )}
+            {flash?.error && (
+                <div role="alert" className="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-800">
+                    {flash.error}
+                </div>
+            )}
 
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Daftar Kamar</h2>
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 className="text-2xl font-bold text-gray-800">Daftar kamar</h1>
                 <Link
                     href="/rooms/create"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition duration-200"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white shadow transition hover:bg-blue-700"
                 >
-                    + Tambah Kamar
+                    + Tambah kamar
                 </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-800 text-white">
-                        <tr>
-                            <th className="p-3 text-sm font-semibold">Nomor Kamar</th>
-                            <th className="p-3 text-sm font-semibold">Status</th>
-                            <th className="p-3 text-sm font-semibold">Harga Dasar</th>
-                            <th className="p-3 text-sm font-semibold">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {rooms.data && rooms.data.length > 0 ? (
-                            rooms.data.map((room) => (
-                                <tr key={room.id} className="hover:bg-gray-50">
-                                    <td className="p-3 text-sm text-gray-700">{room.room_number}</td>
-                                    <td className="p-3 text-sm">
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                                            {room.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-3 text-sm text-gray-700">
-                                        Rp {Number(room.base_price).toLocaleString('id-ID')}
-                                    </td>
-                                    <td className="p-3 text-sm space-x-2">
-                                        <Link
-                                            href={`/rooms/${room.id}`}
-                                            className="px-3 py-1 bg-cyan-500 hover:bg-cyan-600 text-white rounded text-xs"
-                                        >
-                                            Detail
-                                        </Link>
-                                        <Link
-                                            href={`/rooms/${room.id}/edit`}
-                                            className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-xs"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <Link
-                                            href={`/rooms/${room.id}`}
-                                            method="delete"
-                                            as="button"
-                                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs"
-                                        >
-                                            Hapus
-                                        </Link>
-                                    </td>
+            <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
+                {rooms.data.length === 0 ? (
+                    <div className="p-8 text-center">
+                        <p className="text-sm text-gray-600">Belum ada data kamar.</p>
+                        <Link href="/rooms/create" className="mt-3 inline-block text-sm font-semibold text-blue-700 hover:underline">
+                            Tambahkan kamar pertama
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[680px] border-collapse text-left">
+                            <thead className="bg-gray-800 text-white">
+                                <tr>
+                                    <th scope="col" className="p-3 text-sm font-semibold">Nomor kamar</th>
+                                    <th scope="col" className="p-3 text-sm font-semibold">Status</th>
+                                    <th scope="col" className="p-3 text-sm font-semibold">Harga dasar</th>
+                                    <th scope="col" className="p-3 text-sm font-semibold">Aksi</th>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="p-4 text-center text-sm text-gray-500">
-                                    Belum ada data kamar.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {rooms.data.map((room) => (
+                                    <tr key={room.id} className="hover:bg-gray-50">
+                                        <td className="p-3 text-sm text-gray-800">{room.room_number}</td>
+                                        <td className="p-3 text-sm">
+                                            <RoomStatus status={room.status} />
+                                        </td>
+                                        <td className="p-3 text-sm text-gray-700">
+                                            Rp {Number(room.base_price).toLocaleString('id-ID')}
+                                        </td>
+                                        <td className="p-3 text-sm">
+                                            <div className="flex flex-wrap gap-2">
+                                                <Link
+                                                    href={`/rooms/${room.id}`}
+                                                    className="rounded bg-cyan-600 px-3 py-1 text-xs text-white hover:bg-cyan-700"
+                                                >
+                                                    Detail
+                                                </Link>
+                                                <Link
+                                                    href={`/rooms/${room.id}/edit`}
+                                                    className="rounded bg-amber-600 px-3 py-1 text-xs text-white hover:bg-amber-700"
+                                                >
+                                                    Ubah
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    disabled={deletingRoomId !== null}
+                                                    onClick={() => handleDelete(room)}
+                                                    className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                                >
+                                                    {deletingRoomId === room.id ? 'Menghapus...' : 'Hapus'}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
+
+            {rooms.links.length > 3 && (
+                <nav aria-label="Navigasi halaman kamar" className="mt-4">
+                    <ul className="flex flex-wrap gap-2">
+                        {rooms.links.map((link) => (
+                            <li key={link.label}>
+                                {link.url ? (
+                                    <Link
+                                        href={link.url}
+                                        aria-current={link.active ? 'page' : undefined}
+                                        className={`inline-flex min-w-10 justify-center rounded border px-3 py-2 text-sm ${
+                                            link.active
+                                                ? 'border-blue-600 bg-blue-600 text-white'
+                                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {formatPaginationLabel(link.label)}
+                                    </Link>
+                                ) : (
+                                    <span className="inline-flex min-w-10 justify-center rounded border border-gray-200 px-3 py-2 text-sm text-gray-400">
+                                        {formatPaginationLabel(link.label)}
+                                    </span>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+            )}
         </div>
     );
 }
