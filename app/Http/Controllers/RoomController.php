@@ -2,88 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreRoomRequest;
-use App\Http\Requests\UpdateRoomRequest;
 use App\Models\Room;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\Room\StoreRoomRequest;
+use App\Http\Requests\Room\UpdateRoomRequest;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class RoomController extends Controller
 {
-    public function index(): Response
+    public function index()
     {
-        Gate::authorize('viewAny', Room::class);
-        $rooms = Room::query()->orderBy('room_number')->paginate(10);
-        $policyRoom = $rooms->first() ?? new Room;
-
-        return Inertia::render('Dashboard/Rooms/Index', [
-            'rooms' => $rooms,
-            'can' => [
-                'create' => Gate::allows('create', Room::class),
-                'update' => Gate::allows('update', $policyRoom),
-                'delete' => Gate::allows('delete', $policyRoom),
-            ],
-        ]);
+        $rooms = Room::latest()->get();
+        return Inertia::render('Rooms/Index', ['rooms' => $rooms]);
     }
 
-    public function create(): Response
+    public function create()
     {
-        Gate::authorize('create', Room::class);
-
-        return Inertia::render('Dashboard/Rooms/Create');
+        return Inertia::render('Rooms/Create');
     }
 
-    public function store(StoreRoomRequest $request): RedirectResponse
+    public function store(StoreRoomRequest $request)
     {
-        Gate::authorize('create', Room::class);
         Room::create($request->validated());
-
-        return redirect()
-            ->route('rooms.index')
-            ->with('success', 'Kamar berhasil ditambahkan.');
+        return redirect()->route('rooms.index')->with('message', 'Kamar berhasil ditambahkan!');
     }
 
-    public function show(Room $room): Response
+    public function show(Room $room)
     {
-        Gate::authorize('view', $room);
-
-        return Inertia::render('Dashboard/Rooms/Show', [
-            'room' => $room,
-            'can' => [
-                'update' => Gate::allows('update', $room),
-                'delete' => Gate::allows('delete', $room),
-            ],
-        ]);
+        return Inertia::render('Rooms/Show', ['room' => $room]);
     }
 
-    public function edit(Room $room): Response
+    public function edit(Room $room)
     {
-        Gate::authorize('update', $room);
-
-        return Inertia::render('Dashboard/Rooms/Edit', [
-            'room' => $room,
-        ]);
+        return Inertia::render('Rooms/Edit', ['room' => $room]);
     }
 
-    public function update(UpdateRoomRequest $request, Room $room): RedirectResponse
+    public function update(UpdateRoomRequest $request, Room $room)
     {
-        Gate::authorize('update', $room);
         $room->update($request->validated());
-
-        return redirect()
-            ->route('rooms.index')
-            ->with('success', 'Data kamar berhasil diperbarui.');
+        return redirect()->route('rooms.index')->with('message', 'Data kamar berhasil diperbarui!');
     }
 
-    public function destroy(Room $room): RedirectResponse
+    public function destroy(Room $room)
     {
-        Gate::authorize('delete', $room);
         $room->delete();
-
-        return redirect()
-            ->route('rooms.index')
-            ->with('success', 'Kamar berhasil dihapus.');
+        return redirect()->route('rooms.index')->with('message', 'Kamar berhasil dihapus!');
     }
 }

@@ -1,184 +1,58 @@
-# Projek Kos Management
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Sistem informasi berbasis web untuk operasional pemilik/pengelola dan kenyamanan penyewa kos (Laravel).
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-Entitas: `User`, `Room`, `Rental`, `Permission`.
-Peran: `superadmin`, `admin` (penjaga), `pemilik`, `pengekos`.
+## About Laravel
 
-## Prasyarat
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- PHP >= 8.3 dan Composer
-- Node.js + npm
-- Git
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-## A. Menjalankan proyek dari nol (untuk anggota lain)
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-```bash
-git clone <url-repo>
-cd Projek-kos-management
-composer install
-copy .env.example .env        # Linux/macOS: cp .env.example .env
-php artisan key:generate
-type nul > database\database.sqlite   # Linux/macOS: touch database/database.sqlite
-php artisan migrate:fresh --seed
-npm install
-npm run build
-php artisan serve
-```
+## Learning Laravel
 
-Buka `http://localhost:8000`.
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-Data awal hasil seeder:
+In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-| Tabel | Isi |
-|-------|-----|
-| `users` | `superadmin@example.com`, `admin@example.com`, `pemilik@example.com` |
-| `rooms` | `A01` s.d. `A05`, harga dasar 800.000 |
+You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
 
-## B. Langkah pembuatan (dari inisiasi Laravel sampai migrasi + seeder)
+## Agentic Development
 
-### 1. Inisiasi proyek
+Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
 
 ```bash
-composer create-project laravel/laravel Projek-kos-management
-cd Projek-kos-management
-git init
+composer require laravel/boost --dev
+
+php artisan boost:install
 ```
 
-Database default memakai SQLite (`DB_CONNECTION=sqlite` di `.env`), file `database/database.sqlite` dibuat otomatis oleh Composer.
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
-### 2. Membuat model
+## Contributing
 
-```bash
-php artisan make:model Room
-php artisan make:model Rental
-php artisan make:model Permission
-```
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-`User` sudah bawaan Laravel. Isi `$fillable` dan relasi tiap model:
+## Code of Conduct
 
-| Model | `$fillable` | Relasi |
-|-------|-------------|--------|
-| `User` | name, email, google_id, role | `hasMany` Rental, `hasMany` Permission |
-| `Room` | room_number, status, base_price | `hasMany` Rental |
-| `Rental` | user_id, room_id, add_ons, total_price, payment_status | `belongsTo` User, `belongsTo` Room; cast `add_ons` => `array` |
-| `Permission` | user_id, type, description, status | `belongsTo` User |
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-### 3. UUID sebagai primary key
+## Security Vulnerabilities
 
-Tambahkan trait bawaan Laravel di keempat model (mencegah *enumeration attack*):
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-```php
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+## License
 
-class Room extends Model
-{
-    use HasUuids;
-}
-```
-
-Khusus `User`: `use HasFactory, Notifiable, HasUuids;` (import `Illuminate\Database\Eloquent\Factories\HasFactory`).
-
-### 4. Migrasi
-
-**a. Ubah `database/migrations/0001_01_01_000000_create_users_table.php`**
-
-- `users`: `uuid('id')->primary()`, `name`, `email` (unique), `google_id` (nullable, unique), `role` (default `pengekos`), `timestamps()`. Kolom `password` dihapus karena login memakai Google SSO.
-- `sessions.user_id` menjadi `foreignUuid('user_id')->nullable()->index()`.
-- Tabel `password_reset_tokens` dihapus (beserta di `down()`).
-
-**b. Buat migrasi tabel kos**
-
-```bash
-php artisan make:migration create_kos_tables
-```
-
-Isinya membuat:
-
-- `rooms`: `uuid` PK, `room_number` (unique), `status` (default `available`), `base_price` (unsigned integer)
-- `rentals`: `uuid` PK, `foreignUuid` `user_id` & `room_id` (`constrained()->cascadeOnDelete()`), `add_ons` (json, nullable), `total_price`, `payment_status` enum `pending|verified` (default `pending`)
-- `permissions`: `uuid` PK, `foreignUuid` `user_id` (cascade), `type` enum `izin_tamu|izin_kendaraan|komplain_fasilitas`, `description` (text), `status` enum `pending|approved|rejected` (default `pending`)
-
-### 5. Factory
-
-`database/factories/UserFactory.php` menyesuaikan kolom baru (tanpa `password`):
-
-```php
-public function definition(): array
-{
-    return [
-        'name' => fake()->name(),
-        'email' => fake()->unique()->safeEmail(),
-        'google_id' => fake()->unique()->numerify('####################'),
-        'role' => 'pengekos',
-    ];
-}
-```
-
-### 6. Seeder
-
-`database/seeders/DatabaseSeeder.php`:
-
-```php
-public function run(): void
-{
-    foreach (['superadmin', 'admin', 'pemilik'] as $role) {
-        User::factory()->create([
-            'name' => ucfirst($role),
-            'email' => "$role@example.com",
-            'role' => $role,
-        ]);
-    }
-
-    foreach (range(1, 5) as $n) {
-        Room::create(['room_number' => "A0$n", 'base_price' => 800000]);
-    }
-}
-```
-
-Jangan lupa `use App\Models\Room;` di bagian atas file.
-
-### 7. Jalankan migrasi + seeder
-
-```bash
-php artisan migrate:fresh --seed
-```
-
-Semua migrasi berstatus `DONE` dan seeder berjalan tanpa error.
-
-## Catatan
-
-- Rancangan awal menyebut PostgreSQL. Untuk pindah dari SQLite, ubah di `.env`: `DB_CONNECTION=pgsql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, lalu jalankan ulang `php artisan migrate:fresh --seed`.
-- Autentikasi Google SSO, controller, dan view dikerjakan anggota lain.
-
-## C. Tugas Studio 2 – Bobot 2,5%
-
-### 8. Menentukan entitas
-
-Gunakan `Room` sebagai entitas yang dikelola pada tugas ini. Data kamar sudah dibuat di langkah migrasi dan seeder sebelumnya.
-
-### 9. Membuat resource controller dan Form Request
-
-```bash
-php artisan make:controller RoomController --resource --model=Room
-php artisan make:request StoreRoomRequest
-php artisan make:request UpdateRoomRequest
-```
-
-Resource controller menyediakan tujuh aksi: `index`, `create`, `store`, `show`, `edit`, `update`, dan `destroy`. Aturan validasi input kamar ditulis di `StoreRoomRequest` dan `UpdateRoomRequest`, bukan langsung di controller.
-
-### 10. Menambahkan route resource
-
-Daftarkan route resource untuk `RoomController` di `routes/web.php`. Gunakan route model binding pada aksi yang membutuhkan data kamar, supaya controller menerima model `Room` dari route dan tidak perlu mencari data secara manual.
-
-### 11. Membuat halaman CRUD kamar
-
-Buat halaman untuk menampilkan daftar kamar, detail kamar, form tambah, dan form ubah. Form kamar berisi nomor kamar, status, dan harga dasar. Tampilkan error validasi di dekat input yang bermasalah dan pertahankan input yang sudah diisi ketika validasi gagal.
-
-### 12. Mengatur hasil aksi
-
-Hubungkan form dengan aksi `store` dan `update`, lalu sediakan aksi `destroy` untuk menghapus kamar. Setelah aksi tambah, ubah, atau hapus berhasil, arahkan kembali ke halaman yang sesuai dan tampilkan flash message. Tidak perlu menambahkan JavaScript untuk alur ini.
-
-### 13. Mengecek alur dan menyiapkan screenshot
-
-Jalankan aplikasi dan cek alur tambah kamar dengan form kosong, pengiriman data yang ditolak karena input tidak valid, serta pengiriman data yang berhasil. Siapkan tiga screenshot: form kosong, form dengan error validasi, dan halaman setelah berhasil dengan pesan flash.
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

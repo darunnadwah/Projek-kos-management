@@ -1,95 +1,100 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import Checkbox from '@/Components/Checkbox';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import TextInput from '@/Components/TextInput';
+import GuestLayout from '@/Layouts/GuestLayout';
+import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Login() {
-    const { errors = {}, flash } = usePage().props;
-    const form = useForm({
+export default function Login({ status, canResetPassword }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
+        remember: false,
     });
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        form.post('/login');
+    const submit = (e) => {
+        e.preventDefault();
+
+        post(route('login'), {
+            onFinish: () => reset('password'),
+        });
     };
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-            <Head title="Masuk" />
+        <GuestLayout>
+            <Head title="Log in" />
 
-            <section className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow sm:p-8">
-                <h1 className="text-2xl font-bold text-gray-900">Masuk ke Kos Management</h1>
-                <p className="mt-2 text-sm text-gray-600">
-                    Masuk menggunakan email dan kata sandi.
-                </p>
+            {status && (
+                <div className="mb-4 text-sm font-medium text-green-600">
+                    {status}
+                </div>
+            )}
 
-                {flash?.error && (
-                    <div role="alert" className="mt-5 rounded-lg bg-red-100 p-4 text-sm text-red-800">
-                        {flash.error}
-                    </div>
-                )}
+            <form onSubmit={submit}>
+                <div>
+                    <InputLabel htmlFor="email" value="Email" />
 
-                <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
-                    <div className="grid gap-1">
-                        <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            value={form.data.email}
-                            onChange={(event) => form.setData('email', event.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                        />
-                        {errors.email && <p role="alert" className="text-sm text-red-700">{errors.email}</p>}
-                    </div>
+                    <TextInput
+                        id="email"
+                        type="email"
+                        name="email"
+                        value={data.email}
+                        className="mt-1 block w-full"
+                        autoComplete="username"
+                        isFocused={true}
+                        onChange={(e) => setData('email', e.target.value)}
+                    />
 
-                    <div className="grid gap-1">
-                        <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                            Kata sandi
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            autoComplete="current-password"
-                            required
-                            value={form.data.password}
-                            onChange={(event) => form.setData('password', event.target.value)}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                        />
-                        {errors.password && <p role="alert" className="text-sm text-red-700">{errors.password}</p>}
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={form.processing}
-                        className="rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {form.processing ? 'Memproses...' : 'Masuk'}
-                    </button>
-                </form>
-
-                <div className="my-5 flex items-center gap-3 text-xs text-gray-500">
-                    <span className="h-px flex-1 bg-gray-200" />
-                    atau
-                    <span className="h-px flex-1 bg-gray-200" />
+                    <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <a
-                    href="/auth/google/redirect"
-                    className="inline-flex w-full justify-center rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    Masuk dengan Google
-                </a>
+                <div className="mt-4">
+                    <InputLabel htmlFor="password" value="Password" />
 
-                <p className="mt-5 text-center text-sm text-gray-600">
-                    Belum punya akun?{' '}
-                    <Link href="/register" className="font-semibold text-blue-700 hover:underline">
-                        Daftar
-                    </Link>
-                </p>
-            </section>
-        </main>
+                    <TextInput
+                        id="password"
+                        type="password"
+                        name="password"
+                        value={data.password}
+                        className="mt-1 block w-full"
+                        autoComplete="current-password"
+                        onChange={(e) => setData('password', e.target.value)}
+                    />
+
+                    <InputError message={errors.password} className="mt-2" />
+                </div>
+
+                <div className="mt-4 block">
+                    <label className="flex items-center">
+                        <Checkbox
+                            name="remember"
+                            checked={data.remember}
+                            onChange={(e) =>
+                                setData('remember', e.target.checked)
+                            }
+                        />
+                        <span className="ms-2 text-sm text-gray-600">
+                            Remember me
+                        </span>
+                    </label>
+                </div>
+
+                <div className="mt-4 flex items-center justify-end">
+                    {canResetPassword && (
+                        <Link
+                            href={route('password.request')}
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Forgot your password?
+                        </Link>
+                    )}
+
+                    <PrimaryButton className="ms-4" disabled={processing}>
+                        Log in
+                    </PrimaryButton>
+                </div>
+            </form>
+        </GuestLayout>
     );
 }

@@ -2,73 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreRentalRequest;
-use App\Http\Requests\UpdateRentalRequest;
 use App\Models\Rental;
-use App\Models\User;
 use App\Models\Room;
-use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Rental\StoreRentalRequest;
+use App\Http\Requests\Rental\UpdateRentalRequest;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class RentalController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request)
     {
-        return Inertia::render('Dashboard/Rentals/Index', [
-            // Mengurutkan dari penyewaan terbaru
-            'rentals' => Rental::query()->latest()->paginate(10),
-        ]);
+        $user = $request->user();
+        
+        $rentals = Rental::with(['user', 'room'])
+            ->when($user->role === 'user', function ($query) use ($user) {
+                return $query->where('user_id', $user->id);
+            })
+            ->latest()
+            ->get();
+
+        return Inertia::render('Rentals/Index', ['rentals' => $rentals]);
     }
 
     public function create()
     {
-    return Inertia::render('Dashboard/Rentals/Create', [
-            'users' => User::all(),
-            'rooms' => Room::all(),
-        ]);
+        $rooms = Room::where('status', 'available')->get();
+        return Inertia::render('Rentals/Create', ['rooms' => $rooms]);
     }
 
-    public function store(StoreRentalRequest $request): RedirectResponse
+    public function store(StoreRentalRequest $request)
     {
-        $rental = Rental::create($request->validated());
+        Rental::create([
+            'user_id'    => $request->user()->id,
+            'room_id'    => $request->room_id,
+            'start_date' => $request->start_date,
+            'end_date'   => $request->end_date,
+            'status'     => 'pending',
+        ]);
 
-        return redirect()
-            ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil ditambahkan.');
+        return redirect()->route('rentals.index')->with('message', 'Pengajuan sewa berhasil dibuat!');
     }
 
-    public function show(Rental $rental): Response
+    public function show(Rental $rental)
     {
-        return Inertia::render('Dashboard/Rentals/Show', [
-            'rental' => $rental,
-        ]);
+        $rental->load(['user', 'room']);
+        return Inertia::render('Rentals/Show', ['rental' => $rental]);
     }
 
     public function edit(Rental $rental)
     {
-    return Inertia::render('Dashboard/Rentals/Edit', [
+        $rooms = Room::all();
+        $rental->load(['user', 'room']);
+        return Inertia::render('Rentals/Edit', [
             'rental' => $rental,
-            'users' => User::all(),
-            'rooms' => Room::all(),
+            'rooms'  => $rooms,
         ]);
     }
 
-    public function update(UpdateRentalRequest $request, Rental$rental): RedirectResponse
+    public function update(UpdateRentalRequest $request, Rental $rental)
     {
         $rental->update($request->validated());
-
-        return redirect()
-            ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil diperbarui.');
+        return redirect()->route('rentals.index')->with('message', 'Status sewa berhasil diperbarui!');
     }
 
-    public function destroy(Rental $rental): RedirectResponse
+    public function destroy(Rental $rental)
     {
         $rental->delete();
-
-        return redirect()
-            ->route('rentals.index')
-            ->with('success', 'Data penyewaan berhasil dihapus.');
+        return redirect()->route('rentals.index')->with('message', 'Data sewa berhasil dihapus!');
     }
 }

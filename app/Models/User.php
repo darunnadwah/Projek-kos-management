@@ -2,58 +2,40 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+#[Fillable(['name', 'email', 'password'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    public const ROLE_ADMIN = 'admin';
-
-    public const ROLE_PETUGAS = 'petugas';
-
-    use HasFactory, HasUuids, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
         'email',
-        'google_id',
         'password',
+        'role',
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
-    }
-
-    /**
-     * @param  array<int, string>  $roles
-     */
-    public function hasAnyRole(array $roles): bool
-    {
-        return in_array($this->role, $roles, true);
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === self::ROLE_ADMIN;
-    }
-
-    public function rentals(): HasMany
+    // Relasi: User punya banyak Penyewaan
+    public function rentals()
     {
         return $this->hasMany(Rental::class);
     }
 
-    public function permissions(): HasMany
+    // Relasi: User punya banyak Perizinan
+    public function permits()
     {
-        return $this->hasMany(Permission::class);
+        return $this->hasMany(Permit::class);
     }
 }

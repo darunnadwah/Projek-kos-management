@@ -2,20 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Room extends Model
 {
-    use HasUuids;
+    use HasFactory;
+
     protected $fillable = [
         'room_number',
+        'description',
+        'price',
         'status',
-        'base_price',
     ];
 
-    public function rentals(): HasMany
+    // Relasi: Kamar bisa disewa beberapa kali (riwayat)
+    public function rentals()
     {
         return $this->hasMany(Rental::class);
     }

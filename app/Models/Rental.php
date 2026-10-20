@@ -2,31 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Rental extends Model
 {
-    use HasUuids;
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'room_id',
-        'add_ons',
-        'total_price',
-        'payment_status',
+        'start_date',
+        'end_date',
+        'status',
     ];
 
-    protected $casts = [
-        'add_ons' => 'array',
-    ];
-
-    public function user(): BelongsTo
+    // Relasi ke User
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function room(): BelongsTo
+    // Relasi ke Room
+    public function room()
     {
         return $this->belongsTo(Room::class);
     }

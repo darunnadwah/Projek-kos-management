@@ -1,40 +1,51 @@
 <?php
 
-use App\Http\Controllers\Auth\EmailPasswordAuthController;
-use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\RoomController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RentalController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\PermitController;
+use App\Models\Room;
+use App\Models\Rental;
+use App\Models\Permit;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::view('/', 'welcome');
-
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [GoogleAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [EmailPasswordAuthController::class, 'login'])
-        ->middleware('throttle:5,1')
-        ->name('login.store');
-    Route::get('/register', [EmailPasswordAuthController::class, 'showRegistration'])
-        ->name('register');
-    Route::post('/register', [EmailPasswordAuthController::class, 'register'])
-        ->middleware('throttle:5,1')
-        ->name('register.store');
-    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirectToGoogle'])
-        ->middleware('throttle:10,1')
-        ->name('auth.google.redirect');
-    Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])
-        ->middleware('throttle:10,1')
-        ->name('auth.google.callback');
+// 1. Redirect Halaman Utama ke Login
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
-Route::post('/logout', [GoogleAuthController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
+// 2. Group Route yang Membutuhkan Autentikasi (Login)
+Route::middleware(['auth'])->group(function () {
 
-Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
-    Route::resource('rooms', RoomController::class);
+    // Halaman Dashboard Utama
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard', [
+            'auth' => [
+                'user' => auth()->user(),
+            ],
+            'stats' => [
+                'totalRooms'   => Room::count(),
+                'totalRentals' => Rental::count(),
+                'totalPermits' => Permit::count(),
+            ]
+        ]);
+    })->name('dashboard');
+
+    // Akses untuk Semua User yang Sudah Login (Superadmin, Admin, User)
+    Route::resource('rentals', RentalController::class);
+    Route::resource('permits', PermitController::class);
+
+    // Akses Khusus Admin & Superadmin saja
+    Route::middleware(['role:admin,superadmin'])->group(function () {
+        Route::resource('rooms', RoomController::class);
+    });
+
+    // Akses Khusus Superadmin saja
+    Route::middleware(['role:superadmin'])->group(function () {
+        // Route khusus superadmin nanti ditempatkan di sini
+    });
+
 });
-Route::resource('rentals', RentalController::class);
-Route::resource('permissions', PermissionController::class);
-Route::resource('users', UserController::class);
+
+// 3. Import Route Autentikasi bawaan Breeze (Login, Register, Logout, dll)
+require __DIR__.'/auth.php';
