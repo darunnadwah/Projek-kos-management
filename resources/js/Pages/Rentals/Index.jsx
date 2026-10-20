@@ -14,14 +14,7 @@ export default function Index({ rentals = [] }) {
 
     const handleStatusChange = (rental, newStatus) => {
         if (confirm(`Ubah status penyewaan menjadi "${newStatus}"?`)) {
-            put(route('rentals.update', rental.id), {
-                data: {
-                    room_id: rental.room_id,
-                    start_date: rental.start_date,
-                    end_date: rental.end_date,
-                    status: newStatus,
-                },
-            });
+            put(route('rentals.update', rental.id), { status: newStatus });
         }
     };
 
@@ -41,7 +34,7 @@ export default function Index({ rentals = [] }) {
             user={user}
             headerTitle="Daftar Penyewaan Kamar"
             headerAction={
-                user?.role === 'user' && (
+                (user?.role === 'user' || user?.role === 'superadmin') && (
                     <Link
                         href={route('rentals.create')}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
@@ -107,12 +100,14 @@ export default function Index({ rentals = [] }) {
                                                     )}
                                                 </>
                                             )}
-                                            <button
-                                                onClick={() => handleDelete(rental.id)}
-                                                className="text-rose-600 hover:text-rose-900 font-semibold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition"
-                                            >
-                                                Hapus
-                                            </button>
+                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                                <button
+                                                    onClick={() => handleDelete(rental.id)}
+                                                    className="text-rose-600 hover:text-rose-900 font-semibold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

@@ -71,14 +71,22 @@ export default function Dashboard({ auth, stats }) {
                         href={route('rentals.index')}
                         className="p-4 rounded-lg bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 transition text-sm font-semibold text-gray-700 hover:text-indigo-600 block"
                     >
-                        Lihat Penyewaan →
+                        {auth.user.role === 'user' ? 'Ajukan Sewa Kamar →' : 'Kelola Penyewaan →'}
                     </Link>
                     <Link
                         href={route('permits.index')}
                         className="p-4 rounded-lg bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 transition text-sm font-semibold text-gray-700 hover:text-indigo-600 block"
                     >
-                        Lihat Perizinan →
+                        {auth.user.role === 'user' ? 'Ajukan Izin →' : 'Kelola Perizinan →'}
                     </Link>
+                    {auth.user.role === 'superadmin' && (
+                        <Link
+                            href={route('users.index')}
+                            className="p-4 rounded-lg bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 transition text-sm font-semibold text-gray-700 hover:text-indigo-600 block"
+                        >
+                            Kelola Pengguna →
+                        </Link>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

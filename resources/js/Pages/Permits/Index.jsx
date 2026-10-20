@@ -14,13 +14,7 @@ export default function Index({ permits = [] }) {
 
     const handleStatusChange = (permit, newStatus) => {
         if (confirm(`Ubah status perizinan menjadi "${newStatus}"?`)) {
-            put(route('permits.update', permit.id), {
-                data: {
-                    title: permit.title,
-                    description: permit.description,
-                    status: newStatus,
-                },
-            });
+            put(route('permits.update', permit.id), { status: newStatus });
         }
     };
 
@@ -40,7 +34,7 @@ export default function Index({ permits = [] }) {
             user={user}
             headerTitle="Daftar Pengajuan Perizinan"
             headerAction={
-                user?.role === 'user' && (
+                (user?.role === 'user' || user?.role === 'superadmin') && (
                     <Link
                         href={route('permits.create')}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
@@ -102,12 +96,14 @@ export default function Index({ permits = [] }) {
                                                     )}
                                                 </>
                                             )}
-                                            <button
-                                                onClick={() => handleDelete(permit.id)}
-                                                className="text-rose-600 hover:text-rose-900 font-semibold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition"
-                                            >
-                                                Hapus
-                                            </button>
+                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                                <button
+                                                    onClick={() => handleDelete(permit.id)}
+                                                    className="text-rose-600 hover:text-rose-900 font-semibold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

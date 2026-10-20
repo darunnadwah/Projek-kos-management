@@ -8,7 +8,7 @@ class StorePermitRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return in_array($this->user()?->role, ['user', 'superadmin'], true);
     }
 
     public function rules(): array
