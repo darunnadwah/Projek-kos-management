@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import RentalStatus from './RentalStatus';
+import PaymentStatus from './PaymentStatus';
 
 export default function BarisRental({ rental }) {
     const [konfirmasi, setKonfirmasi] = useState(false);
@@ -14,13 +15,19 @@ export default function BarisRental({ rental }) {
                 {rental.room ? `Kamar No. ${rental.room.room_number}` : '-'}
             </td>
             <td className="p-3 text-sm text-gray-700">
-                {rental.start_date} s/d {rental.end_date}
+                {rental.start_date && rental.end_date 
+                    ? `${rental.start_date} s/d ${rental.end_date}` 
+                    : <span className="text-gray-400 italic">Belum diisi</span>
+                }
             </td>
             <td className="p-3 text-sm font-semibold text-gray-800">
                 Rp {Number(rental.total_price || 0).toLocaleString('id-ID')}
             </td>
             <td className="p-3">
                 <RentalStatus status={rental.status} />
+            </td>
+            <td className="p-3">
+                <PaymentStatus status={rental.payment_status} />
             </td>
             <td className="p-3 text-sm">
                 <div className="flex items-center gap-3">
@@ -31,7 +38,6 @@ export default function BarisRental({ rental }) {
                         Ubah
                     </Link>
 
-                    {/* Konfirmasi Hapus Menggunakan State React */}
                     {konfirmasi ? (
                         <span className="inline-flex items-center gap-2 bg-red-50 p-1 rounded border border-red-200">
                             <span className="text-xs text-red-700">Hapus?</span>
@@ -45,7 +51,7 @@ export default function BarisRental({ rental }) {
                             </Link>
                             <button
                                 onClick={() => setKonfirmasi(false)}
-                                className="text-xs bg-gray-300 text-gray-800 px-2 py-1 rounded hover:bg-gray-400"
+                                className="text-xs bg-gray-300 text-gray-800 px-2 py-1 rounded"
                             >
                                 Batal
                             </button>

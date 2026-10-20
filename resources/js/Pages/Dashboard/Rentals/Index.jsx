@@ -33,14 +33,13 @@ export default function Index({ rentals }) {
                 <div className="bg-white shadow-md rounded-lg overflow-hidden border">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-100 border-b">
-                            <tr>
-                                <th className="p-3 font-semibold text-gray-700">Penyewa</th>
-                                <th className="p-3 font-semibold text-gray-700">Kamar</th>
-                                <th className="p-3 font-semibold text-gray-700">Periode Sewa</th>
-                                <th className="p-3 font-semibold text-gray-700">Total Harga</th>
-                                <th className="p-3 font-semibold text-gray-700">Status</th>
-                                <th className="p-3 font-semibold text-gray-700">Aksi</th>
-                            </tr>
+                            <th className="p-3 font-semibold text-gray-700">Penyewa</th>
+                            <th className="p-3 font-semibold text-gray-700">Kamar</th>
+                            <th className="p-3 font-semibold text-gray-700">Periode Sewa</th>
+                            <th className="p-3 font-semibold text-gray-700">Total Harga</th>
+                            <th className="p-3 font-semibold text-gray-700">Status Sewa</th>
+                            <th className="p-3 font-semibold text-gray-700">Status Bayar</th>
+                            <th className="p-3 font-semibold text-gray-700">Aksi</th>
                         </thead>
                         <tbody>
                             {rentalList.map((rental) => (

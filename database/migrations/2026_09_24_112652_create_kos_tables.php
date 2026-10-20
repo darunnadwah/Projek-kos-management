@@ -20,6 +20,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('room_id')->constrained()->cascadeOnDelete();
+           $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->enum('status', ['active', 'pending', 'completed', 'cancelled'])->default('active');
             $table->json('add_ons')->nullable();
             $table->unsignedInteger('total_price');
             $table->enum('payment_status', ['pending', 'verified'])->default('pending');
