@@ -27,7 +27,7 @@ class RentalController extends Controller
 
     public function create()
     {
-        $rooms = Room::where('status', 'available')->get();
+        $rooms = Room::where('status', 'available')->latest()->get();
         return Inertia::render('Rentals/Create', ['rooms' => $rooms]);
     }
 

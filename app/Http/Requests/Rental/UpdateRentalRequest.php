@@ -14,9 +14,6 @@ class UpdateRentalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_id'    => 'required|exists:rooms,id',
-            'start_date' => 'required|date',
-            'end_date'   => 'nullable|date|after_or_equal:start_date',
             'status'     => 'required|in:pending,approved,rejected',
         ];
     }
