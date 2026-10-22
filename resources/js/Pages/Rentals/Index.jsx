@@ -1,127 +1,139 @@
+import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import Modal from '@/Components/Modal';
+import SecondaryButton from '@/Components/SecondaryButton';
+import PrimaryButton from '@/Components/PrimaryButton';
+import DangerButton from '@/Components/DangerButton';
 
-export default function Index({ rentals = [] }) {
-    const { auth } = usePage().props;
-    const user = auth?.user;
-    const { delete: destroy, put } = useForm();
+export default function Index({ auth, rentals }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [actionType, setActionType] = useState(''); // 'approve', 'reject', atau 'delete'
+    const [processing, setProcessing] = useState(false);
 
-    const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus data penyewaan ini?')) {
-            destroy(route('rentals.destroy', id));
-        }
+    const openModal = (item, type) => {
+        setSelectedItem(item);
+        setActionType(type);
+        setIsOpen(true);
     };
 
-    const handleStatusChange = (rental, newStatus) => {
-        if (confirm(`Ubah status penyewaan menjadi "${newStatus}"?`)) {
-            put(route('rentals.update', rental.id), { status: newStatus });
-        }
+    const closeModal = () => {
+        setIsOpen(false);
+        setSelectedItem(null);
+        setActionType('');
     };
 
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case 'approved':
-                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Disetujui</span>;
-            case 'rejected':
-                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Ditolak</span>;
-            default:
-                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Menunggu</span>;
+    const handleSubmit = () => {
+        if (!selectedItem) return;
+
+        setProcessing(true);
+        let url = '';
+        let data = {};
+
+        if (actionType === 'approve') {
+            url = route('rentals.update', selectedItem.id);
+            data = { status: 'approved' };
+        } else if (actionType === 'reject') {
+            url = route('rentals.update', selectedItem.id);
+            data = { status: 'rejected' };
+        } else if (actionType === 'delete') {
+            url = route('rentals.destroy', selectedItem.id);
+        }
+
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => closeModal(),
+            onFinish: () => setProcessing(false),
+        };
+
+        if (actionType === 'delete') {
+            router.delete(url, options);
+        } else {
+            router.put(url, data, options);
         }
     };
 
     return (
         <AuthenticatedLayout
-            user={user}
-            headerTitle="Daftar Penyewaan Kamar"
-            headerAction={
-                (user?.role === 'user' || user?.role === 'superadmin') && (
-                    <Link
-                        href={route('rentals.create')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
-                    >
-                        + Ajukan Sewa Kamar
-                    </Link>
-                )
-            }
+            user={auth.user}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Kelola Penyewaan Kost</h2>}
         >
-            <Head title="Penyewaan" />
+            <div className="py-12">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">Daftar Penyewa & Sewa Kamar</h3>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                <th className="px-6 py-4">Penyewa</th>
-                                <th className="px-6 py-4">Kamar</th>
-                                <th className="px-6 py-4">Tanggal Mulai</th>
-                                <th className="px-6 py-4">Tanggal Selesai</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 text-sm">
-                            {rentals && rentals.length > 0 ? (
-                                rentals.map((rental) => (
-                                    <tr key={rental.id} className="hover:bg-gray-50 transition">
-                                        <td className="px-6 py-4 font-semibold text-gray-900">
-                                            {rental.user?.name || '-'}
-                                            <div className="text-xs text-gray-400 font-normal">{rental.user?.email}</div>
-                                        </td>
-                                        <td className="px-6 py-4 font-medium text-gray-800">
-                                            {rental.room?.room_number || 'Kamar Dihapus'}
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-600">
-                                            {rental.start_date}
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-600">
-                                            {rental.end_date || 'Sewa Berkelanjutan'}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {getStatusBadge(rental.status)}
-                                        </td>
-                                        <td className="px-6 py-4 text-right space-x-2">
-                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                                                <>
-                                                    {rental.status !== 'approved' && (
-                                                        <button
-                                                            onClick={() => handleStatusChange(rental, 'approved')}
-                                                            className="text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold text-xs px-2.5 py-1.5 rounded-md transition"
-                                                        >
-                                                            Setujui
-                                                        </button>
-                                                    )}
-                                                    {rental.status !== 'rejected' && (
-                                                        <button
-                                                            onClick={() => handleStatusChange(rental, 'rejected')}
-                                                            className="text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold text-xs px-2.5 py-1.5 rounded-md transition"
-                                                        >
-                                                            Tolak
-                                                        </button>
-                                                    )}
-                                                </>
-                                            )}
-                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                                                <button
-                                                    onClick={() => handleDelete(rental.id)}
-                                                    className="text-rose-600 hover:text-rose-900 font-semibold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md transition"
-                                                >
-                                                    Hapus
-                                                </button>
-                                            )}
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Penghuni</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kamar</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
-                                        Belum ada riwayat pengajuan sewa.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {rentals && rentals.length > 0 ? (
+                                        rentals.map((rental) => (
+                                            <tr key={rental.id}>
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-900">{rental.user?.name}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-500">{rental.room?.room_number || rental.room?.name}</td>
+                                                <td className="px-6 py-4 text-sm">
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                        rental.status === 'approved' || rental.status === 'active' ? 'bg-green-100 text-green-800' :
+                                                        rental.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                        {rental.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                                                    <button onClick={() => openModal(rental, 'approve')} className="text-green-600 hover:text-green-900">Setujui</button>
+                                                    <button onClick={() => openModal(rental, 'reject')} className="text-yellow-600 hover:text-yellow-900">Tolak</button>
+                                                    <button onClick={() => openModal(rental, 'delete')} className="text-red-600 hover:text-red-900">Hapus</button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">Belum ada data penyewaan.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Modal Konfirmasi Custom */}
+            <Modal show={isOpen} onClose={closeModal} maxWidth="md">
+                <div className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900">
+                        {actionType === 'approve' && 'Konfirmasi Setujui Sewa'}
+                        {actionType === 'reject' && 'Konfirmasi Tolak Sewa'}
+                        {actionType === 'delete' && 'Konfirmasi Hapus Data Sewa'}
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        {actionType === 'approve' && 'Apakah Anda yakin ingin menyetujui penyewaan kamar ini?'}
+                        {actionType === 'reject' && 'Apakah Anda yakin ingin menolak pengajuan penyewaan ini?'}
+                        {actionType === 'delete' && 'Apakah Anda yakin ingin menghapus data penyewaan ini? Tindakan ini tidak dapat dibatalkan.'}
+                    </p>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton type="button" onClick={closeModal}>Batal</SecondaryButton>
+                        {actionType === 'delete' ? (
+                            <DangerButton onClick={handleSubmit} disabled={processing}>
+                                {processing ? 'Menghapus...' : 'Ya, Hapus'}
+                            </DangerButton>
+                        ) : (
+                            <PrimaryButton onClick={handleSubmit} disabled={processing}>
+                                {processing ? 'Memproses...' : 'Ya, Lanjutkan'}
+                            </PrimaryButton>
+                        )}
+                    </div>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
