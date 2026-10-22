@@ -1,15 +1,22 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Index({ rooms = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
     const { delete: destroy } = useForm();
+    const [confirmation, setConfirmation] = useState(null);
 
     const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus kamar ini?')) {
-            destroy(route('rooms.destroy', id));
-        }
+        setConfirmation({
+            title: 'Hapus kamar?',
+            message: 'Data kamar ini akan dihapus dan tidak bisa dipulihkan.',
+            confirmLabel: 'Hapus kamar',
+            destructive: true,
+            onConfirm: () => destroy(route('rooms.destroy', id)),
+        });
     };
 
     return (
@@ -20,7 +27,7 @@ export default function Index({ rooms = [] }) {
                 (user?.role === 'admin' || user?.role === 'superadmin') && (
                     <Link
                         href={route('rooms.create')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
+                        className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
                     >
                         + Tambah Kamar Baru
                     </Link>
@@ -68,7 +75,7 @@ export default function Index({ rooms = [] }) {
                                         <td className="px-6 py-4 text-right space-x-3">
                                             <Link
                                                 href={route('rooms.edit', room.id)}
-                                                className="text-indigo-600 hover:text-indigo-900 font-semibold text-xs bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition"
+                                                className="text-[#3182CE] hover:text-[#0B1B3D] font-semibold text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition"
                                             >
                                                 Edit
                                             </Link>
@@ -92,6 +99,15 @@ export default function Index({ rooms = [] }) {
                     </table>
                 </div>
             </div>
+            <ConfirmActionDialog
+                {...confirmation}
+                show={Boolean(confirmation)}
+                onCancel={() => setConfirmation(null)}
+                onConfirm={() => {
+                    confirmation?.onConfirm();
+                    setConfirmation(null);
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

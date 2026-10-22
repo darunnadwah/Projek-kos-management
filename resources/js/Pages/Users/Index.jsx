@@ -1,14 +1,21 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Index({ users = [] }) {
     const currentUser = usePage().props.auth?.user;
     const { delete: destroy } = useForm();
+    const [confirmation, setConfirmation] = useState(null);
 
     const handleDelete = (user) => {
-        if (confirm(`Hapus akun ${user.name}?`)) {
-            destroy(route('users.destroy', user.id));
-        }
+        setConfirmation({
+            title: 'Hapus akun pengguna?',
+            message: `Akun ${user.name} akan dihapus dan tidak bisa dipulihkan.`,
+            confirmLabel: 'Hapus akun',
+            destructive: true,
+            onConfirm: () => destroy(route('users.destroy', user.id)),
+        });
     };
 
     const roleLabels = {
@@ -23,7 +30,7 @@ export default function Index({ users = [] }) {
             headerAction={
                 <Link
                     href={route('users.create')}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm"
+                    className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm"
                 >
                     + Tambah Pengguna
                 </Link>
@@ -51,7 +58,7 @@ export default function Index({ users = [] }) {
                                     <td className="px-6 py-4 text-right space-x-3">
                                         <Link
                                             href={route('users.edit', user.id)}
-                                            className="text-indigo-600 hover:text-indigo-900 font-semibold text-xs"
+                                            className="text-[#3182CE] hover:text-[#0B1B3D] font-semibold text-xs"
                                         >
                                             Edit
                                         </Link>
@@ -77,6 +84,15 @@ export default function Index({ users = [] }) {
                     </table>
                 </div>
             </div>
+            <ConfirmActionDialog
+                {...confirmation}
+                show={Boolean(confirmation)}
+                onCancel={() => setConfirmation(null)}
+                onConfirm={() => {
+                    confirmation?.onConfirm();
+                    setConfirmation(null);
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

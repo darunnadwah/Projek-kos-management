@@ -1,22 +1,39 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import RoomCard from '@/Components/RoomCard';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Index({ rentals = [], availableRooms = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
-    const { delete: destroy, put } = useForm();
+    const { delete: destroy } = useForm();
+    const [confirmation, setConfirmation] = useState(null);
 
     const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus data penyewaan ini?')) {
-            destroy(route('rentals.destroy', id));
-        }
+        setConfirmation({
+            title: 'Hapus data penyewaan?',
+            message: 'Data penyewaan ini akan dihapus dan tidak bisa dipulihkan.',
+            confirmLabel: 'Hapus data',
+            destructive: true,
+            onConfirm: () => destroy(route('rentals.destroy', id)),
+        });
     };
 
     const handleStatusChange = (rental, newStatus) => {
-        if (confirm(`Ubah status penyewaan menjadi "${newStatus}"?`)) {
-            put(route('rentals.update', rental.id), { status: newStatus });
-        }
+        const statusLabel = newStatus === 'approved' ? 'menyetujui' : 'menolak';
+
+        setConfirmation({
+            title: `Konfirmasi ${statusLabel} penyewaan`,
+            message: `Status penyewaan ${rental.room?.room_number || ''} akan diubah menjadi "${newStatus === 'approved' ? 'Disetujui' : 'Ditolak'}".`,
+            confirmLabel: newStatus === 'approved' ? 'Setujui' : 'Tolak',
+            onConfirm: () =>
+                router.put(
+                    route('rentals.update', rental.id),
+                    { status: newStatus },
+                    { preserveScroll: true },
+                ),
+        });
     };
 
     const getStatusBadge = (status) => {
@@ -43,7 +60,7 @@ export default function Index({ rentals = [], availableRooms = [] }) {
                 user?.role === 'superadmin' && (
                     <Link
                         href={route('rentals.create')}
-                        className="inline-flex items-center rounded-lg bg-[#183b34] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43]"
+                        className="inline-flex items-center rounded-lg bg-[#3182CE] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#2569A8]"
                     >
                         Ajukan sewa kamar
                     </Link>
@@ -60,7 +77,7 @@ export default function Index({ rentals = [], availableRooms = [] }) {
                                 <RoomCard
                                     action={
                                         <Link
-                                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#183b34] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2"
+                                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#3182CE] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#2569A8] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
                                             href={`${route('rentals.create')}?room=${encodeURIComponent(room.id)}`}
                                         >
                                             Pilih kamar
@@ -172,6 +189,15 @@ export default function Index({ rentals = [], availableRooms = [] }) {
                     </table>
                 </div>
             </div>
+            <ConfirmActionDialog
+                {...confirmation}
+                show={Boolean(confirmation)}
+                onCancel={() => setConfirmation(null)}
+                onConfirm={() => {
+                    confirmation?.onConfirm();
+                    setConfirmation(null);
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

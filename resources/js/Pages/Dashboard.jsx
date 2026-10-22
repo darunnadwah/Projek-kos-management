@@ -9,7 +9,7 @@ const metricStyles = {
                 <path d="M3 11h18M8 11v4m8-4v4" />
             </>
         ),
-        iconClass: 'bg-[#edf4f1] text-[#315e50]',
+        iconClass: 'bg-blue-50 text-[#0B1B3D]',
     },
     rentals: {
         icon: (
@@ -18,7 +18,7 @@ const metricStyles = {
                 <path d="M9 12h6" />
             </>
         ),
-        iconClass: 'bg-[#f2f1eb] text-[#756d49]',
+        iconClass: 'bg-[#eef4fb] text-[#3182CE]',
     },
     permits: {
         icon: (
@@ -27,7 +27,17 @@ const metricStyles = {
                 <path d="M14 3v5h5M9 13h6m-6 4h6" />
             </>
         ),
-        iconClass: 'bg-[#f5efeb] text-[#8b5f48]',
+        iconClass: 'bg-[#f1f4f8] text-[#47658D]',
+    },
+    tenants: {
+        icon: (
+            <>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="10" cy="7" r="4" />
+                <path d="M20 8v6m3-3h-6" />
+            </>
+        ),
+        iconClass: 'bg-blue-50 text-[#3182CE]',
     },
 };
 
@@ -105,7 +115,7 @@ function ShortcutIcon({ type }) {
     return (
         <svg
             aria-hidden="true"
-            className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#315e50]"
+            className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#3182CE]"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -143,9 +153,15 @@ function ShortcutIcon({ type }) {
 }
 
 export default function Dashboard({ auth, stats }) {
-    const { totalRooms = 0, totalRentals = 0, totalPermits = 0 } = stats || {};
+    const {
+        totalRooms = 0,
+        totalRentals = 0,
+        totalPermits = 0,
+        totalTenants = 0,
+    } = stats || {};
     const user = auth.user;
     const isResident = user.role === 'user';
+    const isSuperadmin = user.role === 'superadmin';
     const availableShortcuts = shortcuts.filter((shortcut) =>
         shortcut.roles.includes(user.role),
     );
@@ -168,17 +184,27 @@ export default function Dashboard({ auth, stats }) {
             detail: isResident ? 'Permohonan Anda' : 'Permohonan penghuni',
             value: totalPermits,
         },
+        ...(isSuperadmin
+            ? [
+                  {
+                      key: 'tenants',
+                      label: 'Penyewa terdaftar',
+                      detail: 'Akun penyewa di sistem',
+                      value: totalTenants,
+                  },
+              ]
+            : []),
     ];
     const primaryAction = isResident ? (
         <Link
-            className="inline-flex items-center justify-center rounded-lg bg-[#183b34] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-lg bg-[#3182CE] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#2569A8] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
             href={route('rentals.create')}
         >
             Ajukan sewa
         </Link>
     ) : (
         <Link
-            className="inline-flex items-center justify-center rounded-lg bg-[#183b34] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-lg bg-[#3182CE] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#2569A8] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
             href={route('rooms.create')}
         >
             Tambah kamar
@@ -199,7 +225,9 @@ export default function Dashboard({ auth, stats }) {
 
             <section
                 aria-label="Statistik pengelolaan"
-                className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+                className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${
+                    isSuperadmin ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
+                }`}
             >
                 {metrics.map((metric) => (
                     <article
@@ -242,7 +270,7 @@ export default function Dashboard({ auth, stats }) {
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {availableShortcuts.map((shortcut) => (
                         <Link
-                            className="group flex min-h-[104px] items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-[#b8cec5] hover:bg-[#fcfdfc] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2"
+                            className="group flex min-h-[104px] items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-blue-200 hover:bg-blue-50/30 focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
                             href={route(shortcut.href)}
                             key={shortcut.key}
                         >

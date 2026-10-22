@@ -28,6 +28,11 @@ export default function Register() {
         >
             <Head title="Register" />
 
+            <p className="mb-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm leading-5 text-[#0B1B3D]">
+                Pendaftaran mandiri membuat akun penyewa. Akun pengelola hanya
+                dapat dibuat oleh superadmin.
+            </p>
+
             <form onSubmit={submit}>
                 <div>
                     <InputLabel htmlFor="name" value="Nama lengkap" />
@@ -108,7 +113,7 @@ export default function Register() {
                 <div className="mt-4 flex items-center justify-end">
                     <Link
                         href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="rounded-md text-sm text-[#3182CE] underline hover:text-[#0B1B3D] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
                     >
                         Sudah punya akun?
                     </Link>

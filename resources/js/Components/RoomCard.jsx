@@ -3,32 +3,32 @@ export default function RoomCard({ room, action, selected = false }) {
         <article
             className={`overflow-hidden rounded-xl border bg-white transition ${
                 selected
-                    ? 'border-[#315e50] ring-2 ring-[#315e50]/15'
-                    : 'border-slate-200/80 hover:border-[#b8cec5] hover:shadow-sm'
+                    ? 'border-[#3182CE] ring-2 ring-[#3182CE]/15'
+                    : 'border-slate-200/80 hover:border-blue-200 hover:shadow-sm'
             }`}
         >
-            <div className="relative flex h-32 items-center justify-between overflow-hidden bg-[#edf3ef] px-5">
+            <div className="relative flex h-32 items-center justify-between overflow-hidden bg-[#eef4fb] px-5">
                 <span
                     aria-hidden="true"
-                    className="absolute -right-5 -top-12 h-40 w-40 rounded-full border border-[#315e50]/10"
+                    className="absolute -right-5 -top-12 h-40 w-40 rounded-full border border-[#0B1B3D]/10"
                 />
                 <span
                     aria-hidden="true"
-                    className="absolute -right-1 -top-6 h-28 w-28 rounded-full border border-[#315e50]/10"
+                    className="absolute -right-1 -top-6 h-28 w-28 rounded-full border border-[#0B1B3D]/10"
                 />
                 <div className="relative z-10">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#55766a]">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#3182CE]">
                         Kamar kos
                     </p>
-                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#183b34]">
+                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#0B1B3D]">
                         {room.room_number}
                     </h2>
-                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-[#315e50]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#4d8a6e]" />
+                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold text-[#0B1B3D]">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#3182CE]" />
                         Tersedia
                     </span>
                 </div>
-                <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#315e50]">
+                <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/80 bg-white/70 text-[#3182CE]">
                     <svg
                         aria-hidden="true"
                         className="h-7 w-7"

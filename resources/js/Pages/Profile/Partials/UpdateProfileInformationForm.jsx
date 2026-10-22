@@ -1,9 +1,11 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -11,6 +13,7 @@ export default function UpdateProfileInformation({
     className = '',
 }) {
     const user = usePage().props.auth.user;
+    const [isConfirmingUpdate, setIsConfirmingUpdate] = useState(false);
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
@@ -21,7 +24,7 @@ export default function UpdateProfileInformation({
     const submit = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'));
+        setIsConfirmingUpdate(true);
     };
 
     return (
@@ -77,7 +80,7 @@ export default function UpdateProfileInformation({
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="rounded-md text-sm text-[#3182CE] underline hover:text-[#0B1B3D] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2"
                             >
                                 Click here to re-send the verification email.
                             </Link>
@@ -108,6 +111,17 @@ export default function UpdateProfileInformation({
                     </Transition>
                 </div>
             </form>
+            <ConfirmActionDialog
+                show={isConfirmingUpdate}
+                title="Simpan perubahan profil?"
+                message="Informasi profil dan alamat email akan diperbarui."
+                confirmLabel="Simpan perubahan"
+                onCancel={() => setIsConfirmingUpdate(false)}
+                onConfirm={() => {
+                    setIsConfirmingUpdate(false);
+                    patch(route('profile.update'));
+                }}
+            />
         </section>
     );
 }

@@ -1,5 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Form({ user, roles }) {
     const currentUser = usePage().props.auth?.user;
@@ -12,11 +14,12 @@ export default function Form({ user, roles }) {
         password: '',
         password_confirmation: '',
     });
+    const [isConfirmingUpdate, setIsConfirmingUpdate] = useState(false);
 
     const handleSubmit = (event) => {
         event.preventDefault();
         if (isEditing) {
-            put(route('users.update', user.id));
+            setIsConfirmingUpdate(true);
         } else {
             post(route('users.store'));
         }
@@ -28,7 +31,7 @@ export default function Form({ user, roles }) {
             headerAction={
                 <Link
                     href={route('users.index')}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg text-sm transition"
+                    className="bg-white hover:bg-blue-50 text-slate-700 border border-slate-200 font-medium px-4 py-2 rounded-lg text-sm transition"
                 >
                     Kembali
                 </Link>
@@ -103,13 +106,26 @@ export default function Form({ user, roles }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
+                            className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan'}
                         </button>
                     </div>
                 </form>
             </div>
+            {isEditing && (
+                <ConfirmActionDialog
+                    show={isConfirmingUpdate}
+                    title="Simpan perubahan pengguna?"
+                    message={`Perubahan pada akun ${user.name} akan disimpan.`}
+                    confirmLabel="Simpan perubahan"
+                    onCancel={() => setIsConfirmingUpdate(false)}
+                    onConfirm={() => {
+                        setIsConfirmingUpdate(false);
+                        put(route('users.update', user.id));
+                    }}
+                />
+            )}
         </AuthenticatedLayout>
     );
 }

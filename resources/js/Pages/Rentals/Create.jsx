@@ -44,10 +44,10 @@ export default function Create({ auth, rooms = [], selectedRoomId }) {
                                             aria-pressed={
                                                 data.room_id === String(room.id)
                                             }
-                                            className={`inline-flex shrink-0 items-center justify-center rounded-lg px-3 py-2 text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2 ${
+                                            className={`inline-flex shrink-0 items-center justify-center rounded-lg px-3 py-2 text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2 ${
                                                 data.room_id === String(room.id)
-                                                    ? 'bg-[#edf4f1] text-[#183b34]'
-                                                    : 'bg-[#183b34] text-white hover:bg-[#244d43]'
+                                                    ? 'bg-blue-50 text-[#0B1B3D]'
+                                                    : 'bg-[#3182CE] text-white hover:bg-[#2569A8]'
                                             }`}
                                             onClick={() =>
                                                 setData('room_id', String(room.id))
@@ -105,7 +105,7 @@ export default function Create({ auth, rooms = [], selectedRoomId }) {
                                 Mulai sewa
                             </label>
                             <input
-                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3b7868] focus:ring-[#3b7868]"
+                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE]"
                                 id="start_date"
                                 onChange={(e) =>
                                     setData('start_date', e.target.value)
@@ -132,7 +132,7 @@ export default function Create({ auth, rooms = [], selectedRoomId }) {
                                 </span>
                             </label>
                             <input
-                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3b7868] focus:ring-[#3b7868]"
+                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE]"
                                 id="end_date"
                                 onChange={(e) =>
                                     setData('end_date', e.target.value)
@@ -153,7 +153,7 @@ export default function Create({ auth, rooms = [], selectedRoomId }) {
 
                     <div className="mt-6 flex justify-end border-t border-slate-100 pt-5">
                         <button
-                            className="rounded-lg bg-[#183b34] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg bg-[#3182CE] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#2569A8] focus:outline-none focus:ring-2 focus:ring-[#3182CE] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={processing || !data.room_id}
                             type="submit"
                         >

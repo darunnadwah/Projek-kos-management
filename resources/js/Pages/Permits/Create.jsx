@@ -19,7 +19,7 @@ export default function Create({ auth }) {
             headerAction={
                 <Link
                     href={route('permits.index')}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg text-sm transition"
+                    className="bg-white hover:bg-blue-50 text-slate-700 border border-slate-200 font-medium px-4 py-2 rounded-lg text-sm transition"
                 >
                     Kembali
                 </Link>
@@ -35,7 +35,7 @@ export default function Create({ auth }) {
                             type="text"
                             value={data.title}
                             onChange={(e) => setData('title', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                             placeholder="Contoh: Izin Membawa Tamu / Izin Keterlambatan Pulang"
                         />
                         {errors.title && (
@@ -49,7 +49,7 @@ export default function Create({ auth }) {
                             value={data.description}
                             onChange={(e) => setData('description', e.target.value)}
                             rows="4"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                             placeholder="Jelaskan detail perizinan yang diajukan..."
                         />
                         {errors.description && (
@@ -61,7 +61,7 @@ export default function Create({ auth }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
+                            className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
                             {processing ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Izin'}
                         </button>

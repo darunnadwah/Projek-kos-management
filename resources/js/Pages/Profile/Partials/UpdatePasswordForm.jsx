@@ -1,14 +1,16 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 export default function UpdatePasswordForm({ className = '' }) {
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
+    const [isConfirmingUpdate, setIsConfirmingUpdate] = useState(false);
 
     const {
         data,
@@ -27,21 +29,7 @@ export default function UpdatePasswordForm({ className = '' }) {
     const updatePassword = (e) => {
         e.preventDefault();
 
-        put(route('password.update'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current.focus();
-                }
-
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current.focus();
-                }
-            },
-        });
+        setIsConfirmingUpdate(true);
     };
 
     return (
@@ -137,6 +125,31 @@ export default function UpdatePasswordForm({ className = '' }) {
                     </Transition>
                 </div>
             </form>
+            <ConfirmActionDialog
+                show={isConfirmingUpdate}
+                title="Perbarui kata sandi?"
+                message="Kata sandi akunmu akan diganti dengan yang baru."
+                confirmLabel="Perbarui kata sandi"
+                onCancel={() => setIsConfirmingUpdate(false)}
+                onConfirm={() => {
+                    setIsConfirmingUpdate(false);
+                    put(route('password.update'), {
+                        preserveScroll: true,
+                        onSuccess: () => reset(),
+                        onError: (formErrors) => {
+                            if (formErrors.password) {
+                                reset('password', 'password_confirmation');
+                                passwordInput.current.focus();
+                            }
+
+                            if (formErrors.current_password) {
+                                reset('current_password');
+                                currentPasswordInput.current.focus();
+                            }
+                        },
+                    });
+                }}
+            />
         </section>
     );
 }

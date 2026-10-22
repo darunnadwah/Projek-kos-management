@@ -12,7 +12,7 @@ export default function AuthenticatedLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#f6f7f5] text-slate-900 lg:flex">
+        <div className="min-h-screen bg-[#f3f6fa] text-slate-900 lg:flex">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}

@@ -84,7 +84,7 @@ export default function Login({ status, canResetPassword }) {
                     </label>
                     {canResetPassword && (
                         <Link
-                            className="text-xs font-semibold text-[#315e50] transition hover:text-[#183b34] hover:underline"
+                            className="text-xs font-semibold text-[#3182CE] transition hover:text-[#0B1B3D] hover:underline"
                             href={route('password.request')}
                         >
                             Lupa kata sandi?
@@ -101,6 +101,16 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+
+            <p className="mt-6 text-center text-sm text-slate-600">
+                Belum punya akun?{' '}
+                <Link
+                    className="font-semibold text-[#3182CE] transition hover:text-[#0B1B3D] hover:underline"
+                    href={route('register')}
+                >
+                    Daftar sebagai penyewa
+                </Link>
+            </p>
         </GuestLayout>
     );
 }

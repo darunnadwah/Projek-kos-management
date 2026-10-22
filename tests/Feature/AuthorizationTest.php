@@ -147,6 +147,18 @@ class AuthorizationTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Users/Index'));
     }
 
+    public function test_superadmin_dashboard_shows_the_registered_tenant_count(): void
+    {
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+        User::factory()->count(2)->create(['role' => 'user']);
+
+        $this->actingAs($superadmin)
+            ->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('stats.totalTenants', 2));
+    }
+
     public function test_tenant_requests_are_created_for_the_authenticated_user_as_pending(): void
     {
         $tenant = User::factory()->create(['role' => 'user']);

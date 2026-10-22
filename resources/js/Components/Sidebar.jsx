@@ -50,7 +50,7 @@ function NavigationIcon({ name }) {
 
 function BrandMark() {
     return (
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#183b34] text-white">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B1B3D] text-white">
             <svg
                 aria-hidden="true"
                 className="h-5 w-5"
@@ -70,6 +70,11 @@ function BrandMark() {
 export default function Sidebar({ isOpen, onClose }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
+    const roleLabels = {
+        user: 'Penyewa',
+        admin: 'Pengelola',
+        superadmin: 'Superadmin',
+    };
     const navigation = [
         { label: 'Ringkasan', href: route('dashboard'), icon: 'dashboard' },
         ...(['admin', 'superadmin'].includes(user?.role)
@@ -142,8 +147,8 @@ export default function Sidebar({ isOpen, onClose }) {
                                 aria-current={isActive ? 'page' : undefined}
                                 className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
                                     isActive
-                                        ? 'bg-[#edf4f1] text-[#183b34]'
-                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                        ? 'bg-blue-50 text-[#0B1B3D]'
+                                        : 'text-slate-600 hover:bg-blue-50/70 hover:text-[#0B1B3D]'
                                 }`}
                                 href={item.href}
                                 key={item.href}
@@ -152,7 +157,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                 <NavigationIcon name={item.icon} />
                                 {item.label}
                                 {isActive && (
-                                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#3b7868]" />
+                                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#3182CE]" />
                                 )}
                             </Link>
                         );
@@ -161,7 +166,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
                 <div className="mt-auto border-t border-slate-100 pt-5">
                     <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#dce9e4] text-sm font-semibold text-[#25483f]">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-[#0B1B3D]">
                             {user?.name?.charAt(0)?.toUpperCase() || 'K'}
                         </span>
                         <span className="min-w-0">
@@ -169,7 +174,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                 {user?.name || 'Pengguna'}
                             </span>
                             <span className="mt-0.5 block truncate text-[11px] capitalize text-slate-500">
-                                {user?.role || 'Akun'}
+                                {roleLabels[user?.role] || 'Akun'}
                             </span>
                         </span>
                     </div>

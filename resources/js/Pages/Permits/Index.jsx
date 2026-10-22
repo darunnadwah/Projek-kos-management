@@ -1,25 +1,38 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Index({ permits = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
     const { delete: destroy } = useForm();
+    const [confirmation, setConfirmation] = useState(null);
 
     const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus perizinan ini?')) {
-            destroy(route('permits.destroy', id));
-        }
+        setConfirmation({
+            title: 'Hapus pengajuan izin?',
+            message: 'Data pengajuan ini akan dihapus dan tidak bisa dipulihkan.',
+            confirmLabel: 'Hapus pengajuan',
+            destructive: true,
+            onConfirm: () => destroy(route('permits.destroy', id)),
+        });
     };
 
     const handleStatusChange = (permit, newStatus) => {
-        if (confirm(`Ubah status perizinan menjadi "${newStatus}"?`)) {
-            router.put(
-                route('permits.update', permit.id),
-                { status: newStatus },
-                { preserveScroll: true },
-            );
-        }
+        const statusLabel = newStatus === 'approved' ? 'menyetujui' : 'menolak';
+
+        setConfirmation({
+            title: `Konfirmasi ${statusLabel} izin`,
+            message: `Pengajuan "${permit.title}" akan diubah menjadi "${newStatus === 'approved' ? 'Disetujui' : 'Ditolak'}".`,
+            confirmLabel: newStatus === 'approved' ? 'Setujui' : 'Tolak',
+            onConfirm: () =>
+                router.put(
+                    route('permits.update', permit.id),
+                    { status: newStatus },
+                    { preserveScroll: true },
+                ),
+        });
     };
 
     const getStatusBadge = (status) => {
@@ -41,7 +54,7 @@ export default function Index({ permits = [] }) {
                 (user?.role === 'user' || user?.role === 'superadmin') && (
                     <Link
                         href={route('permits.create')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
+                        className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
                     >
                         + Ajukan Izin Baru
                     </Link>
@@ -122,6 +135,15 @@ export default function Index({ permits = [] }) {
                     </table>
                 </div>
             </div>
+            <ConfirmActionDialog
+                {...confirmation}
+                show={Boolean(confirmation)}
+                onCancel={() => setConfirmation(null)}
+                onConfirm={() => {
+                    confirmation?.onConfirm();
+                    setConfirmation(null);
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

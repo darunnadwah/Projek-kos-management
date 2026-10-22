@@ -21,7 +21,7 @@ export default function Create({ auth }) {
             headerAction={
                 <Link
                     href={route('rooms.index')}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg text-sm transition"
+                    className="bg-white hover:bg-blue-50 text-slate-700 border border-slate-200 font-medium px-4 py-2 rounded-lg text-sm transition"
                 >
                     Kembali
                 </Link>
@@ -37,7 +37,7 @@ export default function Create({ auth }) {
                             type="text"
                             value={data.room_number}
                             onChange={(e) => setData('room_number', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                             placeholder="Contoh: Kamar 101"
                         />
                         {errors.room_number && (
@@ -51,7 +51,7 @@ export default function Create({ auth }) {
                             value={data.description}
                             onChange={(e) => setData('description', e.target.value)}
                             rows="3"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                             placeholder="Fasilitas AC, Kamar mandi dalam, Springbed..."
                         />
                         {errors.description && (
@@ -65,7 +65,7 @@ export default function Create({ auth }) {
                             type="number"
                             value={data.price}
                             onChange={(e) => setData('price', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                             placeholder="1500000"
                         />
                         {errors.price && (
@@ -78,7 +78,7 @@ export default function Create({ auth }) {
                         <select
                             value={data.status}
                             onChange={(e) => setData('status', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                         >
                             <option value="available">Tersedia</option>
                             <option value="occupied">Terisi</option>
@@ -92,7 +92,7 @@ export default function Create({ auth }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
+                            className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
                             {processing ? 'Menyimpan...' : 'Simpan Kamar'}
                         </button>

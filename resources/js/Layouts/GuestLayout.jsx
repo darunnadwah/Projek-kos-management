@@ -22,7 +22,7 @@ function BrandMark() {
 export default function GuestLayout({ children, title, description }) {
     return (
         <div className="min-h-screen bg-white lg:grid lg:grid-cols-[minmax(340px,0.9fr)_minmax(460px,1.1fr)]">
-            <section className="relative flex min-h-[300px] flex-col overflow-hidden bg-[#172d28] px-7 py-7 text-white sm:px-10 sm:py-9 lg:min-h-screen lg:px-14 lg:py-10 xl:px-20">
+            <section className="relative flex min-h-[300px] flex-col overflow-hidden bg-[#0B1B3D] px-7 py-7 text-white sm:px-10 sm:py-9 lg:min-h-screen lg:px-14 lg:py-10 xl:px-20">
                 <div
                     aria-hidden="true"
                     className="pointer-events-none absolute -right-20 top-24 h-72 w-72 rounded-full border border-white/[0.08]"
@@ -47,8 +47,8 @@ export default function GuestLayout({ children, title, description }) {
                 </Link>
 
                 <div className="relative z-10 my-auto max-w-lg py-9 lg:py-20">
-                    <span className="mb-5 block h-px w-10 bg-[#a4c5b8]" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.19em] text-[#b7d0c5]">
+                    <span className="mb-5 block h-px w-10 bg-[#3182CE]" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.19em] text-blue-200">
                         Kamar · Penyewaan · Perizinan
                     </p>
                     <h1 className="mt-5 max-w-md text-3xl font-medium leading-tight tracking-[-0.035em] text-white sm:text-[40px]">
@@ -60,7 +60,7 @@ export default function GuestLayout({ children, title, description }) {
                     </p>
 
                     <div className="mt-9 hidden items-center gap-3 text-[11px] font-medium text-white/55 sm:flex">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#9cbeaF]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#3182CE]" />
                         Praktis untuk pengelola dan penghuni
                     </div>
                 </div>
