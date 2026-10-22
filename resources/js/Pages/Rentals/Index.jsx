@@ -1,7 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import RoomCard from '@/Components/RoomCard';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
-export default function Index({ rentals = [] }) {
+export default function Index({ rentals = [], availableRooms = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
     const { delete: destroy, put } = useForm();
@@ -32,19 +33,68 @@ export default function Index({ rentals = [] }) {
     return (
         <AuthenticatedLayout
             user={user}
-            headerTitle="Daftar Penyewaan Kamar"
+            headerTitle={user?.role === 'user' ? 'Pilih kamar' : 'Daftar Penyewaan Kamar'}
+            headerDescription={
+                user?.role === 'user'
+                    ? 'Lihat kamar yang tersedia, lalu pilih yang paling sesuai.'
+                    : 'Pantau dan kelola pengajuan penyewaan kamar.'
+            }
             headerAction={
-                (user?.role === 'user' || user?.role === 'superadmin') && (
+                user?.role === 'superadmin' && (
                     <Link
                         href={route('rentals.create')}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
+                        className="inline-flex items-center rounded-lg bg-[#183b34] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43]"
                     >
-                        + Ajukan Sewa Kamar
+                        Ajukan sewa kamar
                     </Link>
                 )
             }
         >
             <Head title="Penyewaan" />
+
+            {user?.role === 'user' && (
+                <section aria-label="Kamar yang tersedia" className="mb-9">
+                    {availableRooms.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                            {availableRooms.map((room) => (
+                                <RoomCard
+                                    action={
+                                        <Link
+                                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#183b34] px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2"
+                                            href={`${route('rentals.create')}?room=${encodeURIComponent(room.id)}`}
+                                        >
+                                            Pilih kamar
+                                            <span aria-hidden="true">→</span>
+                                        </Link>
+                                    }
+                                    key={room.id}
+                                    room={room}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+                            <p className="text-sm font-semibold text-slate-800">
+                                Belum ada kamar yang tersedia
+                            </p>
+                            <p className="mt-1.5 text-xs text-slate-500">
+                                Silakan cek kembali nanti atau hubungi pengelola kos.
+                            </p>
+                        </div>
+                    )}
+                </section>
+            )}
+
+            {user?.role === 'user' && (
+                <div className="mb-4">
+                    <h2 className="text-base font-semibold tracking-tight text-slate-900">
+                        Riwayat pengajuan
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-500">
+                        Periksa status dan informasi penyewaanmu.
+                    </p>
+                </div>
+            )}
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">

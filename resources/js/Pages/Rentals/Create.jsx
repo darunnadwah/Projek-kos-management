@@ -1,12 +1,16 @@
+import RoomCard from '@/Components/RoomCard';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Create({ auth, rooms }) {
+export default function Create({ auth, rooms = [], selectedRoomId }) {
     const { data, setData, post, processing, errors } = useForm({
-        room_id: '',
+        room_id: selectedRoomId ? String(selectedRoomId) : '',
         start_date: '',
         end_date: '',
     });
+    const selectedRoom = rooms.find(
+        (room) => String(room.id) === data.room_id,
+    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -16,11 +20,12 @@ export default function Create({ auth, rooms }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            headerTitle="Form Pengajuan Sewa Kamar"
+            headerTitle="Ajukan sewa kamar"
+            headerDescription="Pilih kamar yang tersedia, lalu tentukan tanggal penyewaan."
             headerAction={
                 <Link
+                    className="rounded-lg border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                     href={route('rentals.index')}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg text-sm transition"
                 >
                     Kembali
                 </Link>
@@ -28,65 +33,135 @@ export default function Create({ auth, rooms }) {
         >
             <Head title="Ajukan Sewa" />
 
-            <div className="max-w-2xl bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Pilih Kamar Kost</label>
-                        <select
-                            value={data.room_id}
-                            onChange={(e) => setData('room_id', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        >
-                            <option value="">-- Pilih Kamar yang Tersedia --</option>
-                            {rooms && rooms.map((room) => (
-                                <option key={room.id} value={room.id}>
-                                    {room.room_number} - Rp {Number(room.price).toLocaleString('id-ID')} / bulan
-                                </option>
+            <form onSubmit={handleSubmit}>
+                <section aria-label="Pilih kamar" className="mb-8">
+                    {rooms.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                            {rooms.map((room) => (
+                                <RoomCard
+                                    action={
+                                        <button
+                                            aria-pressed={
+                                                data.room_id === String(room.id)
+                                            }
+                                            className={`inline-flex shrink-0 items-center justify-center rounded-lg px-3 py-2 text-[11px] font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2 ${
+                                                data.room_id === String(room.id)
+                                                    ? 'bg-[#edf4f1] text-[#183b34]'
+                                                    : 'bg-[#183b34] text-white hover:bg-[#244d43]'
+                                            }`}
+                                            onClick={() =>
+                                                setData('room_id', String(room.id))
+                                            }
+                                            type="button"
+                                        >
+                                            {data.room_id === String(room.id)
+                                                ? 'Dipilih'
+                                                : 'Pilih kamar'}
+                                        </button>
+                                    }
+                                    key={room.id}
+                                    room={room}
+                                    selected={
+                                        data.room_id === String(room.id)
+                                    }
+                                />
                             ))}
-                        </select>
-                        {errors.room_id && (
-                            <p className="text-red-500 text-xs mt-1">{errors.room_id}</p>
-                        )}
+                        </div>
+                    ) : (
+                        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+                            <p className="text-sm font-semibold text-slate-800">
+                                Belum ada kamar yang tersedia
+                            </p>
+                            <p className="mt-1.5 text-xs text-slate-500">
+                                Silakan cek kembali nanti atau hubungi pengelola kos.
+                            </p>
+                        </div>
+                    )}
+                    {errors.room_id && (
+                        <p className="mt-2 text-xs text-rose-600">
+                            {errors.room_id}
+                        </p>
+                    )}
+                </section>
+
+                <section className="max-w-2xl rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:p-6">
+                    <div className="border-b border-slate-100 pb-4">
+                        <h2 className="text-sm font-semibold text-slate-900">
+                            Tanggal penyewaan
+                        </h2>
+                        <p className="mt-1 text-xs text-slate-500">
+                            {selectedRoom
+                                ? `Kamar ${selectedRoom.room_number} dipilih.`
+                                : 'Pilih kamar di atas sebelum mengisi tanggal.'}
+                        </p>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Tanggal Mulai Sewa</label>
-                        <input
-                            type="date"
-                            value={data.start_date}
-                            onChange={(e) => setData('start_date', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                        {errors.start_date && (
-                            <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>
-                        )}
+                    <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label
+                                className="block text-xs font-semibold text-slate-700"
+                                htmlFor="start_date"
+                            >
+                                Mulai sewa
+                            </label>
+                            <input
+                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3b7868] focus:ring-[#3b7868]"
+                                id="start_date"
+                                onChange={(e) =>
+                                    setData('start_date', e.target.value)
+                                }
+                                required
+                                type="date"
+                                value={data.start_date}
+                            />
+                            {errors.start_date && (
+                                <p className="mt-1.5 text-xs text-rose-600">
+                                    {errors.start_date}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label
+                                className="block text-xs font-semibold text-slate-700"
+                                htmlFor="end_date"
+                            >
+                                Selesai sewa
+                                <span className="ml-1 font-normal text-slate-400">
+                                    (opsional)
+                                </span>
+                            </label>
+                            <input
+                                className="mt-2 block w-full rounded-lg border-slate-300 text-sm text-slate-800 shadow-sm focus:border-[#3b7868] focus:ring-[#3b7868]"
+                                id="end_date"
+                                onChange={(e) =>
+                                    setData('end_date', e.target.value)
+                                }
+                                type="date"
+                                value={data.end_date}
+                            />
+                            <p className="mt-1.5 text-[11px] leading-5 text-slate-500">
+                                Kosongkan untuk sewa bulanan tanpa tanggal akhir.
+                            </p>
+                            {errors.end_date && (
+                                <p className="mt-1.5 text-xs text-rose-600">
+                                    {errors.end_date}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Tanggal Selesai Sewa (Opsional)</label>
-                        <input
-                            type="date"
-                            value={data.end_date}
-                            onChange={(e) => setData('end_date', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                        />
-                        <p className="text-xs text-gray-400 mt-1">Kosongkan jika ingin menyewa bulanan tanpa batas waktu tertentu.</p>
-                        {errors.end_date && (
-                            <p className="text-red-500 text-xs mt-1">{errors.end_date}</p>
-                        )}
-                    </div>
-
-                    <div className="pt-2 flex justify-end">
+                    <div className="mt-6 flex justify-end border-t border-slate-100 pt-5">
                         <button
+                            className="rounded-lg bg-[#183b34] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#244d43] focus:outline-none focus:ring-2 focus:ring-[#3b7868] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={processing || !data.room_id}
                             type="submit"
-                            disabled={processing}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
-                            {processing ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Sewa'}
+                            {processing ? 'Mengirim pengajuan...' : 'Kirim pengajuan'}
                         </button>
                     </div>
-                </form>
-            </div>
+                </section>
+            </form>
         </AuthenticatedLayout>
     );
 }

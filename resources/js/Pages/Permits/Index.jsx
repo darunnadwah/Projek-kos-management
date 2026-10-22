@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 
 export default function Index({ permits = [] }) {
     const { auth } = usePage().props;
     const user = auth?.user;
-    const { delete: destroy, put } = useForm();
+    const { delete: destroy } = useForm();
 
     const handleDelete = (id) => {
         if (confirm('Apakah Anda yakin ingin menghapus perizinan ini?')) {
@@ -14,7 +14,11 @@ export default function Index({ permits = [] }) {
 
     const handleStatusChange = (permit, newStatus) => {
         if (confirm(`Ubah status perizinan menjadi "${newStatus}"?`)) {
-            put(route('permits.update', permit.id), { status: newStatus });
+            router.put(
+                route('permits.update', permit.id),
+                { status: newStatus },
+                { preserveScroll: true },
+            );
         }
     };
 
