@@ -19,34 +19,40 @@ export default function ConfirmPassword() {
     };
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
+        <GuestLayout
+            title="Konfirmasi kata sandi"
+            description="Konfirmasi kata sandi untuk melanjutkan ke bagian yang aman."
+        >
+            <Head title="Konfirmasi Kata Sandi" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
+            <div className="mb-4 text-sm leading-6 text-slate-600">
+                Area ini memerlukan verifikasi tambahan. Masukkan kata sandimu
+                sebelum melanjutkan.
             </div>
 
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+            <form className="space-y-5" onSubmit={submit}>
+                <div>
+                    <InputLabel htmlFor="password" value="Kata sandi" />
 
                     <TextInput
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-2 block w-full px-4 py-3 text-sm"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
+                <div className="pt-1">
+                    <PrimaryButton
+                        className="w-full justify-center"
+                        disabled={processing}
+                    >
+                        Konfirmasi
                     </PrimaryButton>
                 </div>
             </form>

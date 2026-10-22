@@ -1,5 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Edit({ auth, room }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -8,10 +10,11 @@ export default function Edit({ auth, room }) {
         price: room.price || '',
         status: room.status || 'available',
     });
+    const [isConfirmingUpdate, setIsConfirmingUpdate] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route('rooms.update', room.id));
+        setIsConfirmingUpdate(true);
     };
 
     return (
@@ -21,7 +24,7 @@ export default function Edit({ auth, room }) {
             headerAction={
                 <Link
                     href={route('rooms.index')}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-lg text-sm transition"
+                    className="bg-white hover:bg-blue-50 text-slate-700 border border-slate-200 font-medium px-4 py-2 rounded-lg text-sm transition"
                 >
                     Kembali
                 </Link>
@@ -37,7 +40,7 @@ export default function Edit({ auth, room }) {
                             type="text"
                             value={data.room_number}
                             onChange={(e) => setData('room_number', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                         />
                         {errors.room_number && (
                             <p className="text-red-500 text-xs mt-1">{errors.room_number}</p>
@@ -50,7 +53,7 @@ export default function Edit({ auth, room }) {
                             value={data.description}
                             onChange={(e) => setData('description', e.target.value)}
                             rows="3"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                         />
                         {errors.description && (
                             <p className="text-red-500 text-xs mt-1">{errors.description}</p>
@@ -63,7 +66,7 @@ export default function Edit({ auth, room }) {
                             type="number"
                             value={data.price}
                             onChange={(e) => setData('price', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                         />
                         {errors.price && (
                             <p className="text-red-500 text-xs mt-1">{errors.price}</p>
@@ -75,7 +78,7 @@ export default function Edit({ auth, room }) {
                         <select
                             value={data.status}
                             onChange={(e) => setData('status', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            className="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-[#3182CE] focus:ring-[#3182CE] text-sm"
                         >
                             <option value="available">Tersedia</option>
                             <option value="occupied">Terisi</option>
@@ -89,13 +92,24 @@ export default function Edit({ auth, room }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
+                            className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-5 py-2.5 rounded-lg text-sm transition shadow-sm disabled:opacity-50"
                         >
                             {processing ? 'Perbarui...' : 'Perbarui Data Kamar'}
                         </button>
                     </div>
                 </form>
             </div>
+            <ConfirmActionDialog
+                show={isConfirmingUpdate}
+                title="Simpan perubahan kamar?"
+                message={`Perubahan untuk ${room.room_number} akan disimpan.`}
+                confirmLabel="Simpan perubahan"
+                onCancel={() => setIsConfirmingUpdate(false)}
+                onConfirm={() => {
+                    setIsConfirmingUpdate(false);
+                    put(route('rooms.update', room.id));
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\RoomController;
-use App\Http\Controllers\RentalController;
 use App\Http\Controllers\PermitController;
+use App\Http\Controllers\RentalController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
-use App\Models\Room;
-use App\Models\Rental;
 use App\Models\Permit;
+use App\Models\Rental;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,16 +23,21 @@ Route::middleware(['auth'])->group(function () {
     // Halaman Dashboard Utama
     Route::get('/dashboard', function (Request $request) {
         $user = $request->user();
+        $stats = [
+            'totalRooms' => Room::count(),
+            'totalRentals' => Rental::when($user->role === 'user', fn ($query) => $query->where('user_id', $user->id))->count(),
+            'totalPermits' => Permit::when($user->role === 'user', fn ($query) => $query->where('user_id', $user->id))->count(),
+        ];
+
+        if ($user->role === 'superadmin') {
+            $stats['totalTenants'] = User::where('role', 'user')->count();
+        }
 
         return Inertia::render('Dashboard', [
             'auth' => [
                 'user' => $user,
             ],
-            'stats' => [
-                'totalRooms'   => Room::count(),
-                'totalRentals' => Rental::when($user->role === 'user', fn ($query) => $query->where('user_id', $user->id))->count(),
-                'totalPermits' => Permit::when($user->role === 'user', fn ($query) => $query->where('user_id', $user->id))->count(),
-            ]
+            'stats' => $stats,
         ]);
     })->name('dashboard');
 

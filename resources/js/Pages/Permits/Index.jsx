@@ -1,169 +1,151 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import ConfirmActionDialog from '@/Components/ConfirmActionDialog';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
-export default function Index({ auth, permits }) {
-    // State untuk mengontrol Modal Custom
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [actionType, setActionType] = useState(''); // 'approve', 'reject', atau 'delete'
-    const [processing, setProcessing] = useState(false);
+export default function Index({ permits = [] }) {
+    const { auth } = usePage().props;
+    const user = auth?.user;
+    const { delete: destroy } = useForm();
+    const [confirmation, setConfirmation] = useState(null);
 
-    // Fungsi untuk membuka modal kustom
-    const openModal = (item, type) => {
-        setSelectedItem(item);
-        setActionType(type);
-        setIsOpen(true);
+    const handleDelete = (id) => {
+        setConfirmation({
+            title: 'Hapus pengajuan izin?',
+            message: 'Data pengajuan ini akan dihapus dan tidak bisa dipulihkan.',
+            confirmLabel: 'Hapus pengajuan',
+            destructive: true,
+            onConfirm: () => destroy(route('permits.destroy', id)),
+        });
     };
 
-    // Fungsi untuk menutup modal
-    const closeModal = () => {
-        setIsOpen(false);
-        setSelectedItem(null);
-        setActionType('');
+    const handleStatusChange = (permit, newStatus) => {
+        const statusLabel = newStatus === 'approved' ? 'menyetujui' : 'menolak';
+
+        setConfirmation({
+            title: `Konfirmasi ${statusLabel} izin`,
+            message: `Pengajuan "${permit.title}" akan diubah menjadi "${newStatus === 'approved' ? 'Disetujui' : 'Ditolak'}".`,
+            confirmLabel: newStatus === 'approved' ? 'Setujui' : 'Tolak',
+            onConfirm: () =>
+                router.put(
+                    route('permits.update', permit.id),
+                    { status: newStatus },
+                    { preserveScroll: true },
+                ),
+        });
     };
 
-    // Fungsi eksekusi data ke backend via Inertia
-    const handleSubmit = () => {
-        if (!selectedItem) return;
-
-        setProcessing(true);
-        let url = '';
-        let data = {};
-
-        if (actionType === 'approve') {
-            url = route('permits.update', selectedItem.id);
-            data = { status: 'approved' };
-        } else if (actionType === 'reject') {
-            url = route('permits.update', selectedItem.id);
-            data = { status: 'rejected' };
-        } else if (actionType === 'delete') {
-            url = route('permits.destroy', selectedItem.id);
-        }
-
-        const options = {
-            preserveScroll: true,
-            onSuccess: () => closeModal(),
-            onFinish: () => setProcessing(false),
-        };
-
-        if (actionType === 'delete') {
-            router.delete(url, options);
-        } else {
-            router.put(url, data, options);
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'approved':
+                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Disetujui</span>;
+            case 'rejected':
+                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Ditolak</span>;
+            default:
+                return <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Menunggu</span>;
         }
     };
 
     return (
         <AuthenticatedLayout
-            user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Kelola Izin</h2>}
+            user={user}
+            headerTitle="Daftar Pengajuan Perizinan"
+            headerAction={
+                (user?.role === 'user' || user?.role === 'superadmin') && (
+                    <Link
+                        href={route('permits.create')}
+                        className="bg-[#3182CE] hover:bg-[#2569A8] text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm flex items-center gap-1"
+                    >
+                        + Ajukan Izin Baru
+                    </Link>
+                )
+            }
         >
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Daftar Pengajuan Perizinan</h3>
+            <Head title="Perizinan" />
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {permits && permits.length > 0 ? (
-                                    permits.map((permit) => (
-                                        <tr key={permit.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {permit.title}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {permit.description}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    permit.status === 'approved' ? 'bg-green-100 text-green-850' :
-                                                    permit.status === 'rejected' ? 'bg-red-100 text-red-850' : 'bg-yellow-100 text-yellow-850'
-                                                }`}>
-                                                    {permit.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                <button
-                                                    onClick={() => openModal(permit, 'approve')}
-                                                    className="text-green-600 hover:text-green-900"
-                                                >
-                                                    Setujui
-                                                </button>
-                                                <button
-                                                    onClick={() => openModal(permit, 'reject')}
-                                                    className="text-yellow-600 hover:text-yellow-900"
-                                                >
-                                                    Tolak
-                                                </button>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th className="px-6 py-4">Pengaju</th>
+                                <th className="px-6 py-4">Judul Perizinan</th>
+                                <th className="px-6 py-4">Deskripsi / Keterangan</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 text-sm">
+                            {permits && permits.length > 0 ? (
+                                permits.map((permit) => (
+                                    <tr key={permit.id} className="hover:bg-gray-50 transition">
+                                        <td className="px-6 py-4 font-semibold text-gray-900">
+                                            {permit.user?.name || '-'}
+                                            <div className="text-xs text-gray-400 font-normal">{permit.user?.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4 font-bold text-gray-800">
+                                            {permit.title}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                                            {permit.description}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {getStatusBadge(permit.status)}
+                                        </td>
+                                        <td className="px-6 py-4 text-right space-x-2">
+                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                                <>
+                                                    {permit.status !== 'approved' && (
+                                                        <button
+                                                            onClick={() => handleStatusChange(permit, 'approved')}
+                                                            className="text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold text-xs px-2.5 py-1.5 rounded-md transition"
+                                                        >
+                                                            Setujui
+                                                        </button>
+                                                    )}
+                                                    {permit.status !== 'rejected' && (
+                                                        <button
+                                                            onClick={() => handleStatusChange(permit, 'rejected')}
+                                                            className="text-amber-700 bg-amber-50 hover:bg-amber-100 font-semibold text-xs px-2.5 py-1.5 rounded-md transition"
+                                                        >
+                                                            Tolak
+                                                        </button>
+                                                    )}
+                                                </>
+                                            )}
+                                            {(user?.role === 'admin' || user?.role === 'superadmin') && (
                                                 <button
                                                     onClick={() => openModal(permit, 'delete')}
                                                     className="text-red-600 hover:text-red-900"
                                                 >
                                                     Hapus
                                                 </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
-                                            Tidak ada data perizinan.
+                                            )}
                                         </td>
                                     </tr>
-                                )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
+                                        Belum ada data pengajuan perizinan.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
-            {/* Komponen Modal Custom Pengganti Popup Browser */}
-            <Modal show={isOpen} onClose={closeModal} maxWidth="md">
-                <div className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900">
-                        {actionType === 'approve' && 'Konfirmasi Setujui Pengajuan'}
-                        {actionType === 'reject' && 'Konfirmasi Tolak Pengajuan'}
-                        {actionType === 'delete' && 'Konfirmasi Hapus Data'}
-                    </h2>
-
-                    <p className="mt-2 text-sm text-gray-600">
-                        {actionType === 'approve' && 'Apakah Anda yakin ingin mengubah status perizinan ini menjadi "approved"?'}
-                        {actionType === 'reject' && 'Apakah Anda yakin ingin menolak pengajuan perizinan ini?'}
-                        {actionType === 'delete' && 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.'}
-                    </p>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton type="button" onClick={closeModal}>
-                            Batal
-                        </SecondaryButton>
-
-                        {actionType === 'delete' ? (
-                            <DangerButton onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Memproses...' : 'Ya, Hapus'}
-                            </DangerButton>
-                        ) : (
-                            <PrimaryButton onClick={handleSubmit} disabled={processing}>
-                                {processing ? 'Memproses...' : 'Ya, Lanjutkan'}
-                            </PrimaryButton>
-                        )}
-                    </div>
-                </div>
-            </Modal>
+            <ConfirmActionDialog
+                {...confirmation}
+                show={Boolean(confirmation)}
+                onCancel={() => setConfirmation(null)}
+                onConfirm={() => {
+                    confirmation?.onConfirm();
+                    setConfirmation(null);
+                }}
+            />
         </AuthenticatedLayout>
     );
 }

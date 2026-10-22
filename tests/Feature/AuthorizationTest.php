@@ -56,9 +56,40 @@ class AuthorizationTest extends TestCase
                 ->where('permits.0.id', $ownPermit->id));
     }
 
+    public function test_tenant_can_browse_available_rooms_and_preselect_a_room_to_rent(): void
+    {
+        $tenant = User::factory()->create(['role' => 'user']);
+        $availableRoom = $this->createRoom();
+        Room::create([
+            'room_number' => 'Occupied room',
+            'description' => 'Already rented',
+            'price' => 1200000,
+            'status' => 'occupied',
+        ]);
+
+        $this->actingAs($tenant)
+            ->get(route('rentals.index'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Rentals/Index')
+                ->has('availableRooms', 1)
+                ->where('availableRooms.0.id', $availableRoom->id));
+
+        $this->actingAs($tenant)
+            ->get(route('rentals.create', ['room' => $availableRoom->id]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Rentals/Create')
+                ->has('rooms', 1)
+                ->where('selectedRoomId', $availableRoom->id));
+    }
+
     public function test_tenants_cannot_manage_rooms_rentals_permits_or_users(): void
     {
         $tenant = User::factory()->create(['role' => 'user']);
+        $permit = Permit::create([
+            'user_id' => $tenant->id,
+            'title' => 'Izin tenant',
+            'description' => 'Permohonan tenant',
+        ]);
         $rental = Rental::create([
             'user_id' => $tenant->id,
             'room_id' => $this->createRoom()->id,
@@ -67,6 +98,7 @@ class AuthorizationTest extends TestCase
 
         $this->actingAs($tenant)->get(route('rooms.index'))->assertForbidden();
         $this->actingAs($tenant)->put(route('rentals.update', $rental), ['status' => 'approved'])->assertForbidden();
+        $this->actingAs($tenant)->put(route('permits.update', $permit), ['status' => 'approved'])->assertForbidden();
         $this->actingAs($tenant)->get(route('users.index'))->assertForbidden();
     }
 
@@ -84,6 +116,11 @@ class AuthorizationTest extends TestCase
             'title' => 'Izin',
             'description' => 'Permohonan',
         ]);
+        $approvedPermit = Permit::create([
+            'user_id' => $tenant->id,
+            'title' => 'Izin disetujui',
+            'description' => 'Permohonan untuk disetujui',
+        ]);
 
         $this->actingAs($admin)
             ->put(route('rentals.update', $rental), ['status' => 'approved'])
@@ -91,10 +128,14 @@ class AuthorizationTest extends TestCase
         $this->actingAs($admin)
             ->put(route('permits.update', $permit), ['status' => 'rejected'])
             ->assertRedirect(route('permits.index'));
+        $this->actingAs($admin)
+            ->put(route('permits.update', $approvedPermit), ['status' => 'approved'])
+            ->assertRedirect(route('permits.index'));
         $this->actingAs($admin)->get(route('users.index'))->assertForbidden();
 
         $this->assertDatabaseHas('rentals', ['id' => $rental->id, 'status' => 'approved']);
         $this->assertDatabaseHas('permits', ['id' => $permit->id, 'status' => 'rejected']);
+        $this->assertDatabaseHas('permits', ['id' => $approvedPermit->id, 'status' => 'approved']);
     }
 
     public function test_superadmin_can_open_user_management(): void
@@ -104,6 +145,18 @@ class AuthorizationTest extends TestCase
         $this->actingAs($superadmin)
             ->get(route('users.index'))
             ->assertInertia(fn (Assert $page) => $page->component('Users/Index'));
+    }
+
+    public function test_superadmin_dashboard_shows_the_registered_tenant_count(): void
+    {
+        $superadmin = User::factory()->create(['role' => 'superadmin']);
+        User::factory()->count(2)->create(['role' => 'user']);
+
+        $this->actingAs($superadmin)
+            ->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('stats.totalTenants', 2));
     }
 
     public function test_tenant_requests_are_created_for_the_authenticated_user_as_pending(): void

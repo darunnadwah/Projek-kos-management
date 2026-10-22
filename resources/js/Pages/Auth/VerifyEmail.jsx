@@ -12,36 +12,41 @@ export default function VerifyEmail({ status }) {
     };
 
     return (
-        <GuestLayout>
-            <Head title="Email Verification" />
+        <GuestLayout
+            title="Verifikasi email"
+            description="Satu langkah lagi untuk mengaktifkan akun Kosmate."
+        >
+            <Head title="Verifikasi Email" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                Thanks for signing up! Before getting started, could you verify
-                your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
+            <div className="mb-5 text-sm leading-6 text-slate-600">
+                Buka tautan verifikasi yang kami kirim ke emailmu. Jika belum
+                menerima email, kamu bisa meminta tautan baru.
             </div>
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                <div className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                    Tautan verifikasi baru telah dikirim ke alamat emailmu.
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
-                        Resend Verification Email
+            <form className="flex flex-col gap-4" onSubmit={submit}>
+                <div>
+                    <PrimaryButton
+                        className="w-full justify-center"
+                        disabled={processing}
+                    >
+                        {processing ? 'Mengirim...' : 'Kirim ulang tautan'}
                     </PrimaryButton>
+                </div>
 
+                <div className="text-center">
                     <Link
+                        className="text-xs font-semibold text-slate-500 transition hover:text-slate-800"
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        Log Out
+                        Keluar
                     </Link>
                 </div>
             </form>

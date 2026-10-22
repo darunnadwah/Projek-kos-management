@@ -7,11 +7,8 @@ import UpdateProfileInformationForm from './Partials/UpdateProfileInformationFor
 export default function Edit({ mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Profile
-                </h2>
-            }
+            headerTitle="Profil"
+            headerDescription="Kelola informasi akun dan keamanan aksesmu."
         >
             <Head title="Profile" />
 
